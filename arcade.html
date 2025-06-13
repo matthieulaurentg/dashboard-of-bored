@@ -3,278 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Arcade - Matthieu's Text</title>
+    <title>Console</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Source+Code+Pro:wght@300;400;600&display=swap');
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
         
-        :root {
-            --neon-blue: #00d4ff;
-            --neon-pink: #ff0080;
-            --neon-green: #00ff88;
-            --neon-purple: #8000ff;
-            --neon-orange: #ff6600;
-            --dark-bg: #0a0a0f;
-            --darker-bg: #050508;
-            --terminal-bg: #0f0f23;
-            --text-primary: #ffffff;
-            --text-secondary: #b8b8b8;
-            --gradient-neon: linear-gradient(45deg, var(--neon-blue), var(--neon-pink), var(--neon-green));
-        }
-        
         body {
-            font-family: 'Source Code Pro', monospace;
-            background: var(--dark-bg);
-            color: var(--text-primary);
-            overflow-x: hidden;
-            line-height: 1.4;
-            min-height: 100vh;
-        }
-        
-        /* Animated background */
-        .bg-effects {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -2;
-            background: 
-                radial-gradient(circle at 20% 80%, var(--neon-blue) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, var(--neon-pink) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, var(--neon-green) 0%, transparent 50%);
-            opacity: 0.03;
-            animation: colorShift 10s ease-in-out infinite alternate;
-        }
-        
-        @keyframes colorShift {
-            0% { filter: hue-rotate(0deg); }
-            100% { filter: hue-rotate(180deg); }
-        }
-        
-        /* Scanlines */
-        .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(transparent 50%, rgba(0, 212, 255, 0.03) 50%);
-            background-size: 100% 4px;
-            z-index: -1;
-            pointer-events: none;
-        }
-        
-        /* Header */
-        .header {
-            background: var(--darker-bg);
-            border-bottom: 3px solid var(--neon-blue);
-            padding: 1.5rem 0;
-            text-align: center;
-            position: relative;
-            box-shadow: 0 0 20px var(--neon-blue);
-        }
-        
-        .logo {
-            font-family: 'Orbitron', monospace;
-            font-size: 2.5rem;
-            font-weight: 900;
-            background: var(--gradient-neon);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px var(--neon-blue);
-            margin-bottom: 0.5rem;
-        }
-        
-        .subtitle {
-            color: var(--neon-green);
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        
-        /* Navigation */
-        .nav {
-            background: rgba(15, 15, 35, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 1rem 0;
-            text-align: center;
-            border-bottom: 1px solid var(--neon-purple);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .nav a {
-            color: var(--text-primary);
-            text-decoration: none;
-            margin: 0 1.5rem;
-            padding: 0.6rem 1.2rem;
-            border: 1px solid var(--neon-blue);
-            border-radius: 20px;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.9rem;
-        }
-        
-        .nav a:hover,
-        .nav a.active {
-            background: var(--neon-blue);
-            color: var(--dark-bg);
-            box-shadow: 0 0 15px var(--neon-blue);
-            transform: translateY(-2px);
-        }
-        
-        /* Main container */
-        .container {
-            display: flex;
-            max-width: 1600px;
-            margin: 0 auto;
-            min-height: calc(100vh - 180px);
-        }
-        
-        /* Sidebar */
-        .sidebar {
-            width: 300px;
-            background: rgba(15, 15, 35, 0.8);
-            border-right: 2px solid var(--neon-purple);
-            padding: 2rem;
-            backdrop-filter: blur(10px);
-        }
-        
-        .game-status {
-            background: var(--terminal-bg);
-            border: 2px solid var(--neon-green);
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
-        }
-        
-        .current-game {
-            color: var(--neon-green);
-            font-family: 'Orbitron', monospace;
-            font-size: 1.2rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 1rem;
-        }
-        
-        .status-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.8rem;
-            color: var(--text-secondary);
-        }
-        
-        .status-value {
-            color: var(--neon-blue);
-            font-weight: 600;
-        }
-        
-        .quick-commands {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--neon-orange);
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .quick-commands h3 {
-            color: var(--neon-orange);
-            font-family: 'Orbitron', monospace;
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-        
-        .command-btn {
-            display: block;
-            width: 100%;
-            background: transparent;
-            color: var(--neon-orange);
-            border: 1px solid var(--neon-orange);
-            padding: 0.8rem;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            font-family: 'Source Code Pro', monospace;
-            font-size: 0.9rem;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-            text-align: left;
-        }
-        
-        .command-btn:hover {
-            background: var(--neon-orange);
-            color: var(--dark-bg);
-            box-shadow: 0 0 10px var(--neon-orange);
-        }
-        
-        .help-section {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--neon-pink);
-            border-radius: 10px;
-            padding: 1rem;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-        
-        .help-section h4 {
-            color: var(--neon-pink);
-            margin-bottom: 0.5rem;
-        }
-        
-        /* Terminal area */
-        .terminal-container {
-            flex: 1;
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
+            font-family: 'Courier New', monospace;
+            background: #000000;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
         }
         
         .terminal {
-            flex: 1;
-            background: var(--terminal-bg);
-            border: 3px solid var(--neon-blue);
-            border-radius: 15px;
-            padding: 2rem;
-            margin-bottom: 1.5rem;
+            width: 100%;
+            height: calc(100vh - 50px);
+            background: #000000;
+            padding: 20px;
             overflow-y: auto;
             white-space: pre-wrap;
-            font-family: 'Source Code Pro', monospace;
+            font-family: 'Courier New', monospace;
             font-size: 14px;
             line-height: 1.5;
-            box-shadow: 
-                0 0 20px var(--neon-blue),
-                inset 0 0 20px rgba(0, 212, 255, 0.1);
-            position: relative;
-            min-height: 500px;
-        }
-        
-        .terminal::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.03), transparent),
-                linear-gradient(0deg, transparent, rgba(0, 212, 255, 0.03), transparent);
-            pointer-events: none;
-            animation: terminalGlow 2s ease-in-out infinite alternate;
-        }
-        
-        @keyframes terminalGlow {
-            0% { opacity: 0.5; }
-            100% { opacity: 1; }
         }
         
         .terminal::-webkit-scrollbar {
@@ -282,182 +36,56 @@
         }
         
         .terminal::-webkit-scrollbar-track {
-            background: var(--darker-bg);
+            background: #000000;
         }
         
         .terminal::-webkit-scrollbar-thumb {
-            background: var(--neon-blue);
-            border-radius: 4px;
+            background: #ffffff;
         }
         
-        /* Input section */
         .input-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             display: flex;
-            gap: 1rem;
-            align-items: center;
+            background: #000000;
+            padding: 10px 20px;
+            border-top: 1px solid #ffffff;
         }
         
         .input-prompt {
-            color: var(--neon-green);
-            font-family: 'Orbitron', monospace;
-            font-weight: 700;
-            font-size: 1.1rem;
-            min-width: 80px;
+            color: #ffffff;
+            margin-right: 10px;
         }
         
         .input {
             flex: 1;
-            background: var(--darker-bg);
-            color: var(--text-primary);
-            border: 2px solid var(--neon-green);
-            padding: 1rem;
-            font-family: 'Source Code Pro', monospace;
-            font-size: 14px;
-            border-radius: 8px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-        
-        .input:focus {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
-        }
-        
-        .execute-btn {
-            background: var(--gradient-neon);
-            color: var(--dark-bg);
+            background: #000000;
+            color: #ffffff;
             border: none;
-            padding: 1rem 2rem;
-            font-family: 'Orbitron', monospace;
-            font-weight: 700;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .execute-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.5);
-        }
-        
-        /* Terminal text colors */
-        .terminal .system { color: var(--neon-blue); }
-        .terminal .success { color: var(--neon-green); }
-        .terminal .error { color: var(--neon-pink); }
-        .terminal .warning { color: var(--neon-orange); }
-        .terminal .highlight { color: var(--neon-purple); }
-        .terminal .command { color: var(--neon-green); font-weight: 600; }
-        
-        /* Responsive design */
-        @media (max-width: 1200px) {
-            .container {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                border-right: none;
-                border-bottom: 2px solid var(--neon-purple);
-            }
-            
-            .nav a {
-                display: block;
-                margin: 0.3rem 0;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .logo {
-                font-size: 2rem;
-            }
-            
-            .terminal-container,
-            .sidebar {
-                padding: 1rem;
-            }
-            
-            .input-section {
-                flex-direction: column;
-                gap: 0.8rem;
-            }
-            
-            .input-prompt {
-                min-width: auto;
-            }
+            outline: none;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <div class="bg-effects"></div>
-    <div class="scanlines"></div>
+    <div class="terminal" id="terminal">
+MATTHIEU'S TEXT CONSOLE v1.0
+Initializing...
+System ready.
+Available games: Three Card Roulette, Adventure
+Type "help" for commands
+
+ROULETTE GAME ACTIVE
+Current credits: $100
+
+    </div>
     
-    <header class="header">
-        <div class="logo">CYBER ARCADE</div>
-        <div class="subtitle">Neural Gaming Interface</div>
-    </header>
-    
-    <nav class="nav">
-        <a href="index.html">HOME</a>
-        <a href="arcade.html" class="active">ARCADE</a>
-        <a href="about.html">ABOUT</a>
-    </nav>
-    
-    <div class="container">
-        <aside class="sidebar">
-            <div class="game-status">
-                <div class="current-game" id="currentGameDisplay">ROULETTE PROTOCOL</div>
-                <div class="status-item">
-                    <span>Credits:</span>
-                    <span class="status-value" id="creditsDisplay">$100</span>
-                </div>
-                <div class="status-item">
-                    <span>Session:</span>
-                    <span class="status-value" id="sessionDisplay">Active</span>
-                </div>
-                <div class="status-item">
-                    <span>Win Rate:</span>
-                    <span class="status-value" id="winRateDisplay">0%</span>
-                </div>
-            </div>
-            
-            <div class="quick-commands">
-                <h3>Quick Access</h3>
-                <button class="command-btn" onclick="executeQuickCommand('help')">⚡ System Help</button>
-                <button class="command-btn" onclick="executeQuickCommand('stats')">📊 Statistics</button>
-                <button class="command-btn" onclick="executeQuickCommand('balance')">💰 Check Credits</button>
-                <button class="command-btn" onclick="executeQuickCommand('adventure')">🌐 Switch to Adventure</button>
-                <button class="command-btn" onclick="executeQuickCommand('roulette')">🎰 Switch to Roulette</button>
-            </div>
-            
-            <div class="help-section">
-                <h4>System Status</h4>
-                <p>Neural interface: <span style="color: var(--neon-green);">ONLINE</span></p>
-                <p>Quantum save: <span style="color: var(--neon-green);">ACTIVE</span></p>
-                <p>Games loaded: <span style="color: var(--neon-blue);">2/2</span></p>
-            </div>
-        </aside>
-        
-        <main class="terminal-container">
-            <div class="terminal" id="terminal">
-                <span class="system">MATTHIEU'S TEXT NEURAL ARCADE v2.0</span>
-                <span class="system">Initializing quantum gaming protocols...</span>
-                <span class="success">System ready. Neural interface established.</span>
-                <span class="highlight">Available games: Three Card Roulette, Cyber Adventure</span>
-                <span class="warning">Type "help" for system commands or "adventure"/"roulette" to switch games</span>
-                
-                <span class="system">ROULETTE PROTOCOL ACTIVE</span>
-                <span class="command">Current credits: $100</span>
-                
-            </div>
-            
-            <div class="input-section">
-                <span class="input-prompt">CMD></span>
-                <input type="text" class="input" id="commandInput" placeholder="Enter neural command...">
-                <button class="execute-btn" onclick="processCommand()">EXECUTE</button>
-            </div>
-        </main>
+    <div class="input-section">
+        <span class="input-prompt">></span>
+        <input type="text" class="input" id="commandInput" autofocus>
     </div>
 
     <script>
@@ -483,10 +111,35 @@
 
         const terminal = document.getElementById('terminal');
         const commandInput = document.getElementById('commandInput');
-        const currentGameDisplay = document.getElementById('currentGameDisplay');
-        const creditsDisplay = document.getElementById('creditsDisplay');
-        const sessionDisplay = document.getElementById('sessionDisplay');
-        const winRateDisplay = document.getElementById('winRateDisplay');
+        
+        // Auto-save functionality
+        function saveGame() {
+            const gameData = {
+                currentGame: currentGame,
+                rouletteState: rouletteState,
+                adventureState: adventureState,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('matthieu_console_save', JSON.stringify(gameData));
+        }
+        
+        function loadGame() {
+            const saved = localStorage.getItem('matthieu_console_save');
+            if (saved) {
+                try {
+                    const gameData = JSON.parse(saved);
+                    currentGame = gameData.currentGame || 'roulette';
+                    rouletteState = { ...rouletteState, ...gameData.rouletteState };
+                    adventureState = { ...adventureState, ...gameData.adventureState };
+                    print('Game loaded from auto-save.');
+                } catch (e) {
+                    print('Save file corrupted. Starting fresh.');
+                }
+            }
+        }
+        
+        // Auto-save every 10 seconds
+        setInterval(saveGame, 10000);
         
         // Adventure Game Locations
         const locations = {
@@ -548,85 +201,64 @@
             }
         };
 
-        function print(text, className = '') {
+        function print(text) {
             const line = document.createElement('div');
-            line.className = className;
             line.textContent = text;
             terminal.appendChild(line);
             terminal.scrollTop = terminal.scrollHeight;
         }
 
-        function updateSidebar() {
-            creditsDisplay.textContent = '$' + rouletteState.balance;
-            
-            const winRate = rouletteState.totalBets > 0 ? 
-                ((rouletteState.totalWins / rouletteState.totalBets) * 100).toFixed(1) : 0;
-            winRateDisplay.textContent = winRate + '%';
-            
-            if (currentGame === 'roulette') {
-                currentGameDisplay.textContent = 'ROULETTE PROTOCOL';
-            } else {
-                currentGameDisplay.textContent = 'ADVENTURE MODE';
-            }
-        }
-
-        function executeQuickCommand(cmd) {
-            commandInput.value = cmd;
-            processCommand();
-        }
-
         function showHelp() {
             if (currentGame === 'roulette') {
-                print('ROULETTE NEURAL INTERFACE COMMANDS:', 'system');
-                print('help - Show system commands', 'command');
-                print('balance - Display current credits', 'command');
-                print('stats - Show gaming statistics', 'command');
-                print('bet red [amount] - Bet on red cards', 'command');
-                print('bet black [amount] - Bet on black cards', 'command');
-                print('bet hearts [amount] - Bet on hearts', 'command');
-                print('bet diamonds [amount] - Bet on diamonds', 'command');
-                print('bet clubs [amount] - Bet on clubs', 'command');
-                print('bet spades [amount] - Bet on spades', 'command');
-                print('rules - Display game protocols', 'command');
-                print('adventure - Switch to adventure mode', 'command');
-                print('clear - Clear terminal display', 'command');
+                print('ROULETTE COMMANDS:');
+                print('help - Show commands');
+                print('balance - Show credits');
+                print('stats - Show statistics');
+                print('bet red [amount] - Bet on red');
+                print('bet black [amount] - Bet on black');
+                print('bet hearts [amount] - Bet on hearts');
+                print('bet diamonds [amount] - Bet on diamonds');
+                print('bet clubs [amount] - Bet on clubs');
+                print('bet spades [amount] - Bet on spades');
+                print('rules - Show rules');
+                print('adventure - Switch to adventure');
+                print('clear - Clear screen');
                 print('');
             } else {
-                print('ADVENTURE NEURAL INTERFACE COMMANDS:', 'system');
-                print('help - Show system commands', 'command');
-                print('look - Scan current location', 'command');
-                print('go [direction] - Move through virtual space', 'command');
-                print('take [item] - Acquire digital artifact', 'command');
-                print('inventory - Display carried items', 'command');
-                print('use [item] - Activate item protocol', 'command');
-                print('talk - Interface with AI entities', 'command');
-                print('status - Display neural status', 'command');
-                print('roulette - Switch to roulette mode', 'command');
-                print('clear - Clear terminal display', 'command');
+                print('ADVENTURE COMMANDS:');
+                print('help - Show commands');
+                print('look - Look around');
+                print('go [direction] - Move');
+                print('take [item] - Take item');
+                print('inventory - Show items');
+                print('use [item] - Use item');
+                print('talk - Talk to people');
+                print('status - Show status');
+                print('roulette - Switch to roulette');
+                print('clear - Clear screen');
                 print('');
             }
         }
         
-        // Adventure Game Functions
         function describeLocation() {
             const loc = locations[adventureState.location];
-            print('=== ' + loc.name.toUpperCase() + ' ===', 'highlight');
+            print('=== ' + loc.name.toUpperCase() + ' ===');
             
             if (!adventureState.visitedLocations.includes(adventureState.location)) {
-                print(loc.firstVisit, 'system');
+                print(loc.firstVisit);
                 adventureState.visitedLocations.push(adventureState.location);
                 adventureState.score += 10;
             }
             
-            print(loc.description, '');
+            print(loc.description);
             
             if (loc.items.length > 0) {
-                print('Digital artifacts detected: ' + loc.items.join(', '), 'warning');
+                print('Items: ' + loc.items.join(', '));
             }
             
             const exits = Object.keys(loc.exits);
             if (exits.length > 0) {
-                print('Available pathways: ' + exits.join(', '), 'success');
+                print('Exits: ' + exits.join(', '));
             }
             print('');
         }
@@ -635,10 +267,10 @@
             const loc = locations[adventureState.location];
             if (loc.exits[direction]) {
                 adventureState.location = loc.exits[direction];
-                print('Neural pathway established...', 'system');
+                print('Moving...');
                 describeLocation();
             } else {
-                print('Pathway blocked. Neural route unavailable.', 'error');
+                print('Cannot go that way.');
             }
         }
         
@@ -649,23 +281,24 @@
                 loc.items.splice(itemIndex, 1);
                 adventureState.inventory.push(item);
                 adventureState.score += 5;
-                print('Digital artifact acquired: ' + item, 'success');
+                print('Taken: ' + item);
+                saveGame(); // Auto-save after taking item
             } else {
-                print('Artifact not found in current sector.', 'error');
+                print('Item not found.');
             }
         }
         
         function showInventory() {
             if (adventureState.inventory.length === 0) {
-                print('Neural inventory is empty.', 'warning');
+                print('Inventory empty.');
             } else {
-                print('Neural inventory contains: ' + adventureState.inventory.join(', '), 'success');
+                print('Inventory: ' + adventureState.inventory.join(', '));
             }
         }
         
         function useItem(item) {
             if (!adventureState.inventory.includes(item)) {
-                print('Artifact not in neural inventory.', 'error');
+                print('Item not in inventory.');
                 return;
             }
             
@@ -674,97 +307,97 @@
                     adventureState.health = Math.min(100, adventureState.health + 25);
                     adventureState.inventory = adventureState.inventory.filter(i => i !== item);
                     adventureState.score += 15;
-                    print('Neural enhancement activated. Health restored to: ' + adventureState.health, 'success');
+                    print('Health restored to: ' + adventureState.health);
                     break;
                 case 'crystal':
                     if (adventureState.location === 'village_center') {
-                        print('The AI entity analyzes the crystal data...', 'system');
-                        print('"This quantum crystal contains immense power," it processes.', 'highlight');
+                        print('Wizard examines crystal...');
+                        print('"This crystal has great power," he says.');
                         adventureState.inventory.push('magic_ring');
                         adventureState.inventory = adventureState.inventory.filter(i => i !== item);
                         adventureState.score += 50;
-                        print('Quantum reward received: magic_ring', 'success');
+                        print('Received: magic_ring');
                     } else {
-                        print('Crystal emits quantum resonance but no system response.', 'warning');
+                        print('Crystal glows but nothing happens.');
                     }
                     break;
                 case 'stick':
-                    print('You calibrate the primitive weapon. Combat readiness increased.', 'system');
+                    print('You wave the stick. Could be useful as weapon.');
                     break;
                 case 'coin':
                     if (adventureState.location === 'shop') {
-                        print('Trading protocol initiated...', 'system');
+                        print('Trading with shopkeeper...');
                         adventureState.inventory.push('super_potion');
                         adventureState.inventory = adventureState.inventory.filter(i => i !== item);
                         adventureState.score += 25;
-                        print('Trade successful. Acquired: super_potion', 'success');
+                        print('Received: super_potion');
                     } else {
-                        print('Digital currency gleams with data potential.', 'highlight');
+                        print('Coin gleams in the light.');
                     }
                     break;
                 default:
-                    print('Artifact activation protocol not found.', 'error');
+                    print('Cannot use that here.');
             }
         }
         
         function talkToCharacters() {
             if (adventureState.location === 'village_center') {
-                print('AI Entity transmits: "Greetings, neural traveler. Bring quantum crystal for reward protocol."', 'highlight');
+                print('Wizard: "Bring me a crystal for reward."');
             } else if (adventureState.location === 'shop') {
-                print('Trading AI responds: "Welcome to commerce interface. Digital coins accepted for enhancement items."', 'highlight');
+                print('Shopkeeper: "I accept coins for items."');
             } else if (adventureState.location === 'village') {
-                print('Local AI warns: "Caution advised in forest sectors. Anomalous data detected."', 'warning');
+                print('Villager: "Be careful in the forest."');
             } else {
-                print('No AI entities detected in current sector.', 'system');
+                print('No one to talk to.');
             }
         }
         
         function showAdventureStatus() {
-            print('NEURAL STATUS REPORT:', 'system');
-            print('Health Matrix: ' + adventureState.health + '/100', 'success');
-            print('Experience Points: ' + adventureState.score, 'success');
-            print('Current Sector: ' + locations[adventureState.location].name, 'highlight');
-            print('Inventory: ' + (adventureState.inventory.length > 0 ? adventureState.inventory.join(', ') : 'Empty'), 'warning');
+            print('STATUS:');
+            print('Health: ' + adventureState.health + '/100');
+            print('Score: ' + adventureState.score);
+            print('Location: ' + locations[adventureState.location].name);
+            print('Inventory: ' + (adventureState.inventory.length > 0 ? adventureState.inventory.join(', ') : 'Empty'));
             print('');
         }
 
         function showBalance() {
-            print('CREDIT BALANCE: $' + rouletteState.balance, 'success');
+            print('Balance: $' + rouletteState.balance);
             print('');
         }
 
         function showStats() {
-            print('ROULETTE NEURAL STATISTICS:', 'system');
-            print('Total Bets Processed: ' + rouletteState.totalBets, 'highlight');
-            print('Successful Outcomes: ' + rouletteState.totalWins, 'success');
-            print('Failed Outcomes: ' + rouletteState.totalLosses, 'error');
+            print('STATISTICS:');
+            print('Total Bets: ' + rouletteState.totalBets);
+            print('Wins: ' + rouletteState.totalWins);
+            print('Losses: ' + rouletteState.totalLosses);
             const winRate = rouletteState.totalBets > 0 ? ((rouletteState.totalWins / rouletteState.totalBets) * 100).toFixed(1) : 0;
-            print('Success Rate: ' + winRate + '%', 'warning');
+            print('Win Rate: ' + winRate + '%');
             if (rouletteState.lastCard) {
-                print('Last Card Data: ' + rouletteState.lastCard, 'highlight');
-                print('Last Result: ' + rouletteState.lastResult, 'highlight');
+                print('Last Card: ' + rouletteState.lastCard);
+                print('Last Result: ' + rouletteState.lastResult);
             }
             print('');
         }
 
         function showRules() {
-            print('ROULETTE QUANTUM PROTOCOLS:', 'system');
-            print('Card Matrix: Hearts, Diamonds, Clubs, Spades, Joker', 'highlight');
-            print('Color Bets (2:1 payout): red, black', 'success');
-            print('Exact Bets (3:1 payout): hearts, diamonds, clubs, spades', 'success');
-            print('Joker Protocol: All credits refunded', 'warning');
-            print('Minimum bet: $1', 'warning');
+            print('RULES:');
+            print('Cards: Hearts, Diamonds, Clubs, Spades, Joker');
+            print('Color Bets (2:1): red, black');
+            print('Suit Bets (3:1): hearts, diamonds, clubs, spades');
+            print('Joker: Credits refunded');
+            print('Minimum bet: $1');
             print('');
         }
 
         function processBet(betType, amount) {
             if (amount < 1) {
-                print('Minimum bet threshold: $1', 'error');
+                print('Minimum bet: $1');
                 return;
             }
             
             if (amount > rouletteState.balance) {
-                print('Insufficient credits. Available: $' + rouletteState.balance, 'error');
+                print('Insufficient credits: $' + rouletteState.balance);
                 return;
             }
 
@@ -775,14 +408,14 @@
             const drawnCard = cards[Math.floor(Math.random() * cards.length)];
             rouletteState.lastCard = drawnCard;
 
-            print('Bet Protocol: ' + betType + ' $' + amount, 'system');
-            print('Quantum card matrix processing...', 'system');
-            print('Card generated: ' + drawnCard.toUpperCase(), 'highlight');
+            print('Bet: ' + betType + ' $' + amount);
+            print('Drawing...');
+            print('Card: ' + drawnCard.toUpperCase());
 
             if (drawnCard === 'joker') {
                 rouletteState.balance += amount;
                 rouletteState.lastResult = 'refund';
-                print('JOKER PROTOCOL ACTIVATED! Credits refunded.', 'warning');
+                print('JOKER! Credits refunded.');
             } else {
                 let won = false;
                 let payout = 0;
@@ -802,68 +435,56 @@
                     rouletteState.balance += payout;
                     rouletteState.totalWins++;
                     rouletteState.lastResult = 'win $' + payout;
-                    print('NEURAL SUCCESS! Payout: $' + payout, 'success');
+                    print('WIN! Payout: $' + payout);
                 } else {
                     rouletteState.totalLosses++;
                     rouletteState.lastResult = 'loss $' + amount;
-                    print('NEURAL FAILURE! Credits lost: $' + amount, 'error');
+                    print('LOSE! Lost: $' + amount);
                 }
             }
 
-            print('Updated credit balance: $' + rouletteState.balance, 'system');
+            print('Balance: $' + rouletteState.balance);
 
             if (rouletteState.balance <= 0) {
-                print('CRITICAL: Credit depletion detected!', 'error');
-                print('Emergency protocol: Restarting with $100...', 'warning');
+                print('Out of credits! Reset to $100');
                 rouletteState.balance = 100;
             }
             print('');
-            updateSidebar();
+            saveGame(); // Auto-save after bet
         }
 
         function switchToAdventure() {
             currentGame = 'adventure';
-            updateSidebar();
-            print('Switching to Adventure Neural Matrix...', 'system');
-            print('Adventure protocol activated.', 'success');
+            print('Switching to Adventure...');
             print('');
             describeLocation();
+            saveGame(); // Auto-save on game switch
         }
         
         function switchToRoulette() {
             currentGame = 'roulette';
-            updateSidebar();
-            print('Switching to Roulette Neural Protocol...', 'system');
-            print('Roulette matrix activated.', 'success');
-            print('Current credits: $' + rouletteState.balance, 'highlight');
+            print('Switching to Roulette...');
+            print('Credits: $' + rouletteState.balance);
             print('');
+            saveGame(); // Auto-save on game switch
         }
 
         function processCommand() {
             const command = commandInput.value.trim().toLowerCase();
             if (!command) return;
 
-            print('CMD> ' + command, 'command');
+            print('> ' + command);
             commandInput.value = '';
 
             const parts = command.split(' ');
             const cmd = parts[0];
 
-            // Universal commands
             if (cmd === 'help') {
                 showHelp();
                 return;
             }
             if (cmd === 'clear') {
                 terminal.innerHTML = '';
-                return;
-            }
-            if (cmd === 'quit') {
-                print('Neural interface terminating...', 'system');
-                print('Returning to main portal...', 'warning');
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 2000);
                 return;
             }
             if (cmd === 'adventure') {
@@ -875,7 +496,6 @@
                 return;
             }
 
-            // Game-specific commands
             if (currentGame === 'roulette') {
                 switch (cmd) {
                     case 'balance':
@@ -889,28 +509,27 @@
                         break;
                     case 'bet':
                         if (parts.length < 3) {
-                            print('Bet protocol syntax: bet [type] [amount]', 'error');
-                            print('Example: bet red 25', 'system');
+                            print('Usage: bet [type] [amount]');
                             break;
                         }
                         const betType = parts[1];
                         const amount = parseInt(parts[2]);
                         
                         if (isNaN(amount)) {
-                            print('Invalid credit amount', 'error');
+                            print('Invalid amount');
                             break;
                         }
 
                         const validBets = ['red', 'black', 'hearts', 'diamonds', 'clubs', 'spades'];
                         if (!validBets.includes(betType)) {
-                            print('Invalid bet type. Valid protocols: red, black, hearts, diamonds, clubs, spades', 'error');
+                            print('Invalid bet. Valid: red, black, hearts, diamonds, clubs, spades');
                             break;
                         }
 
                         processBet(betType, amount);
                         break;
                     default:
-                        print('Command not recognized. Type "help" for available protocols.', 'error');
+                        print('Unknown command. Type "help"');
                         break;
                 }
             } else if (currentGame === 'adventure') {
@@ -920,14 +539,14 @@
                         break;
                     case 'go':
                         if (parts.length < 2) {
-                            print('Specify pathway direction (north, south, east, west, inside, outside)', 'error');
+                            print('Go where? (north, south, east, west, inside, outside)');
                         } else {
                             movePlayer(parts[1]);
                         }
                         break;
                     case 'take':
                         if (parts.length < 2) {
-                            print('Specify artifact to acquire', 'error');
+                            print('Take what?');
                         } else {
                             takeItem(parts[1]);
                         }
@@ -937,7 +556,7 @@
                         break;
                     case 'use':
                         if (parts.length < 2) {
-                            print('Specify artifact to activate', 'error');
+                            print('Use what?');
                         } else {
                             useItem(parts[1]);
                         }
@@ -949,7 +568,7 @@
                         showAdventureStatus();
                         break;
                     default:
-                        print('Command not recognized. Type "help" for available protocols.', 'error');
+                        print('Unknown command. Type "help"');
                         break;
                 }
             }
@@ -961,13 +580,12 @@
             }
         });
 
-        // Initialize
-        updateSidebar();
-        commandInput.focus();
+        // Load game on startup
+        loadGame();
         
-        // Terminal startup effect
         setTimeout(() => {
-            print('All systems operational. Ready for neural commands.', 'success');
+            print('Ready. Type "help" for commands.');
+            saveGame(); // Initial save
         }, 1000);
     </script>
 </body>
