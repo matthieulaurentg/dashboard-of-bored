@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sed:*)",
+      "Bash(git add:*)",
+      "Bash(gh repo create:*)",
+      "Bash(git config:*)",
+      "Bash(git remote add:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(gh auth:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(ssh-keygen:*)",
+      "Bash(cat:*)",
+      "WebFetch(domain:matthieulaurentg.github.io)",
+      "WebFetch(domain:github.com)",
+      "Bash(git commit:*)"
+    ],
+    "deny": []
+  }
+}
