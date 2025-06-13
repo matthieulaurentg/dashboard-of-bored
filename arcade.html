@@ -21,9 +21,9 @@
         
         .terminal {
             width: 100%;
-            height: calc(100vh - 50px);
+            height: calc(100vh - 140px);
             background: #000000;
-            padding: 20px;
+            padding: 15px;
             overflow-y: auto;
             white-space: pre-wrap;
             font-family: 'Courier New', monospace;
@@ -66,7 +66,75 @@
             border: none;
             outline: none;
             font-family: 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 16px;
+            padding: 8px;
+        }
+        
+        .mobile-buttons {
+            display: none;
+            position: fixed;
+            bottom: 60px;
+            left: 0;
+            right: 0;
+            background: #111;
+            padding: 10px;
+            border-top: 1px solid #333;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .mobile-btn {
+            display: inline-block;
+            background: #333;
+            color: #fff;
+            border: 1px solid #666;
+            padding: 8px 12px;
+            margin: 2px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .mobile-btn:active {
+            background: #555;
+        }
+        
+        @media (max-width: 768px) {
+            .terminal {
+                height: calc(100vh - 200px);
+                padding: 10px;
+                font-size: 13px;
+            }
+            
+            .input-section {
+                padding: 8px 10px;
+            }
+            
+            .input {
+                font-size: 16px;
+                padding: 10px;
+                border: 1px solid #333;
+            }
+            
+            .mobile-buttons {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .terminal {
+                height: calc(100vh - 220px);
+                padding: 8px;
+                font-size: 12px;
+            }
+            
+            .mobile-btn {
+                font-size: 11px;
+                padding: 6px 8px;
+                min-width: 50px;
+            }
         }
     </style>
 </head>
@@ -81,6 +149,19 @@ Type "help" for commands
 ROULETTE GAME ACTIVE
 Current credits: $100
 
+    </div>
+    
+    <div class="mobile-buttons" id="mobileButtons">
+        <button class="mobile-btn" onclick="quickCommand('help')">help</button>
+        <button class="mobile-btn" onclick="quickCommand('balance')">balance</button>
+        <button class="mobile-btn" onclick="quickCommand('stats')">stats</button>
+        <button class="mobile-btn" onclick="quickCommand('bet red 10')">bet red</button>
+        <button class="mobile-btn" onclick="quickCommand('bet black 10')">bet black</button>
+        <button class="mobile-btn" onclick="quickCommand('look')">look</button>
+        <button class="mobile-btn" onclick="quickCommand('inventory')">inv</button>
+        <button class="mobile-btn" onclick="quickCommand('adventure')">adventure</button>
+        <button class="mobile-btn" onclick="quickCommand('roulette')">roulette</button>
+        <button class="mobile-btn" onclick="quickCommand('clear')">clear</button>
     </div>
     
     <div class="input-section">
@@ -111,6 +192,11 @@ Current credits: $100
 
         const terminal = document.getElementById('terminal');
         const commandInput = document.getElementById('commandInput');
+        
+        function quickCommand(cmd) {
+            commandInput.value = cmd;
+            processCommand();
+        }
         
         // Auto-save functionality
         function saveGame() {
@@ -577,6 +663,19 @@ Current credits: $100
         commandInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 processCommand();
+            }
+        });
+        
+        // Prevent zoom on mobile when focusing input
+        commandInput.addEventListener('focus', function() {
+            if (window.innerWidth <= 768) {
+                document.querySelector('meta[name=viewport]').setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+            }
+        });
+        
+        commandInput.addEventListener('blur', function() {
+            if (window.innerWidth <= 768) {
+                document.querySelector('meta[name=viewport]').setAttribute('content', 'width=device-width, initial-scale=1.0');
             }
         });
 
