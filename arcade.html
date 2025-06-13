@@ -143,7 +143,7 @@
 MATTHIEU'S TEXT CONSOLE v1.0
 Initializing...
 System ready.
-Available games: Three Card Roulette, Adventure
+Available games: Three Card Roulette, Adventure, Stonks
 Type "help" for commands
 
 ROULETTE GAME ACTIVE
@@ -161,6 +161,7 @@ Current credits: $100
         <button class="mobile-btn" onclick="quickCommand('inventory')">inv</button>
         <button class="mobile-btn" onclick="quickCommand('adventure')">adventure</button>
         <button class="mobile-btn" onclick="quickCommand('roulette')">roulette</button>
+        <button class="mobile-btn" onclick="quickCommand('stonks')">stonks</button>
         <button class="mobile-btn" onclick="quickCommand('clear')">clear</button>
     </div>
     
@@ -189,6 +190,27 @@ Current credits: $100
             visitedLocations: [],
             gameFlags: {}
         };
+        
+        let stonksState = {
+            cash: 1000,
+            portfolio: {
+                TSLA: 0,
+                APPL: 0,
+                GOOG: 0,
+                MSFT: 0,
+                AMZN: 0
+            },
+            prices: {
+                TSLA: 250,
+                APPL: 180,
+                GOOG: 140,
+                MSFT: 320,
+                AMZN: 130
+            },
+            priceHistory: {},
+            totalTrades: 0,
+            totalProfit: 0
+        };
 
         const terminal = document.getElementById('terminal');
         const commandInput = document.getElementById('commandInput');
@@ -204,6 +226,7 @@ Current credits: $100
                 currentGame: currentGame,
                 rouletteState: rouletteState,
                 adventureState: adventureState,
+                stonksState: stonksState,
                 timestamp: Date.now()
             };
             localStorage.setItem('matthieu_console_save', JSON.stringify(gameData));
@@ -217,6 +240,7 @@ Current credits: $100
                     currentGame = gameData.currentGame || 'roulette';
                     rouletteState = { ...rouletteState, ...gameData.rouletteState };
                     adventureState = { ...adventureState, ...gameData.adventureState };
+                    stonksState = { ...stonksState, ...gameData.stonksState };
                     print('Game loaded from auto-save.');
                 } catch (e) {
                     print('Save file corrupted. Starting fresh.');
@@ -308,9 +332,10 @@ Current credits: $100
                 print('bet spades [amount] - Bet on spades');
                 print('rules - Show rules');
                 print('adventure - Switch to adventure');
+                print('stonks - Switch to stonks');
                 print('clear - Clear screen');
                 print('');
-            } else {
+            } else if (currentGame === 'adventure') {
                 print('ADVENTURE COMMANDS:');
                 print('help - Show commands');
                 print('look - Look around');
@@ -321,6 +346,20 @@ Current credits: $100
                 print('talk - Talk to people');
                 print('status - Show status');
                 print('roulette - Switch to roulette');
+                print('stonks - Switch to stonks');
+                print('clear - Clear screen');
+                print('');
+            } else if (currentGame === 'stonks') {
+                print('STONKS COMMANDS:');
+                print('help - Show commands');
+                print('portfolio - Show holdings');
+                print('prices - Show current prices');
+                print('buy [stock] [shares] - Buy shares');
+                print('sell [stock] [shares] - Sell shares');
+                print('market - Update market prices');
+                print('stats - Show trading stats');
+                print('roulette - Switch to roulette');
+                print('adventure - Switch to adventure');
                 print('clear - Clear screen');
                 print('');
             }
@@ -554,6 +593,109 @@ Current credits: $100
             print('');
             saveGame(); // Auto-save on game switch
         }
+        
+        function switchToStonks() {
+            currentGame = 'stonks';
+            print('Switching to Stonks Trading...');
+            print('Cash: $' + stonksState.cash);
+            showPortfolioValue();
+            print('');
+            saveGame(); // Auto-save on game switch
+        }
+        
+        function updateMarketPrices() {
+            const stocks = Object.keys(stonksState.prices);
+            stocks.forEach(stock => {
+                const change = (Math.random() - 0.5) * 20; // -10 to +10
+                const newPrice = Math.max(10, stonksState.prices[stock] + change);
+                stonksState.prices[stock] = Math.round(newPrice * 100) / 100;
+            });
+            print('Market prices updated!');
+        }
+        
+        function showPrices() {
+            print('CURRENT STOCK PRICES:');
+            Object.entries(stonksState.prices).forEach(([stock, price]) => {
+                print(stock + ': $' + price.toFixed(2));
+            });
+            print('');
+        }
+        
+        function showPortfolio() {
+            print('PORTFOLIO:');
+            print('Cash: $' + stonksState.cash.toFixed(2));
+            let totalValue = stonksState.cash;
+            Object.entries(stonksState.portfolio).forEach(([stock, shares]) => {
+                if (shares > 0) {
+                    const value = shares * stonksState.prices[stock];
+                    totalValue += value;
+                    print(stock + ': ' + shares + ' shares ($' + value.toFixed(2) + ')');
+                }
+            });
+            print('Total Portfolio Value: $' + totalValue.toFixed(2));
+            print('');
+        }
+        
+        function showPortfolioValue() {
+            let totalValue = stonksState.cash;
+            Object.entries(stonksState.portfolio).forEach(([stock, shares]) => {
+                totalValue += shares * stonksState.prices[stock];
+            });
+            print('Portfolio Value: $' + totalValue.toFixed(2));
+        }
+        
+        function showStonksStats() {
+            print('TRADING STATISTICS:');
+            print('Total Trades: ' + stonksState.totalTrades);
+            print('Total Profit/Loss: $' + stonksState.totalProfit.toFixed(2));
+            print('');
+        }
+        
+        function buyStonks(stock, shares) {
+            stock = stock.toUpperCase();
+            if (!stonksState.prices[stock]) {
+                print('Unknown stock: ' + stock);
+                print('Available: TSLA, APPL, GOOG, MSFT, AMZN');
+                return;
+            }
+            
+            const cost = shares * stonksState.prices[stock];
+            if (cost > stonksState.cash) {
+                print('Insufficient cash. Need $' + cost.toFixed(2) + ', have $' + stonksState.cash.toFixed(2));
+                return;
+            }
+            
+            stonksState.cash -= cost;
+            stonksState.portfolio[stock] += shares;
+            stonksState.totalTrades++;
+            
+            print('Bought ' + shares + ' shares of ' + stock + ' for $' + cost.toFixed(2));
+            print('Cash remaining: $' + stonksState.cash.toFixed(2));
+            saveGame();
+        }
+        
+        function sellStonks(stock, shares) {
+            stock = stock.toUpperCase();
+            if (!stonksState.prices[stock]) {
+                print('Unknown stock: ' + stock);
+                return;
+            }
+            
+            if (stonksState.portfolio[stock] < shares) {
+                print('Insufficient shares. Have ' + stonksState.portfolio[stock] + ' shares of ' + stock);
+                return;
+            }
+            
+            const revenue = shares * stonksState.prices[stock];
+            stonksState.cash += revenue;
+            stonksState.portfolio[stock] -= shares;
+            stonksState.totalTrades++;
+            stonksState.totalProfit += revenue - (shares * 100); // Assume avg buy price of 100 for profit calc
+            
+            print('Sold ' + shares + ' shares of ' + stock + ' for $' + revenue.toFixed(2));
+            print('Cash: $' + stonksState.cash.toFixed(2));
+            saveGame();
+        }
 
         function processCommand() {
             const command = commandInput.value.trim().toLowerCase();
@@ -579,6 +721,10 @@ Current credits: $100
             }
             if (cmd === 'roulette') {
                 switchToRoulette();
+                return;
+            }
+            if (cmd === 'stonks') {
+                switchToStonks();
                 return;
             }
 
@@ -657,6 +803,56 @@ Current credits: $100
                         print('Unknown command. Type "help"');
                         break;
                 }
+            } else if (currentGame === 'stonks') {
+                switch (cmd) {
+                    case 'portfolio':
+                        showPortfolio();
+                        break;
+                    case 'prices':
+                        showPrices();
+                        break;
+                    case 'market':
+                        updateMarketPrices();
+                        showPrices();
+                        break;
+                    case 'stats':
+                        showStonksStats();
+                        break;
+                    case 'buy':
+                        if (parts.length < 3) {
+                            print('Usage: buy [stock] [shares]');
+                            print('Available stocks: TSLA, APPL, GOOG, MSFT, AMZN');
+                            break;
+                        }
+                        const buyStock = parts[1];
+                        const buyShares = parseInt(parts[2]);
+                        
+                        if (isNaN(buyShares) || buyShares <= 0) {
+                            print('Invalid number of shares');
+                            break;
+                        }
+                        
+                        buyStonks(buyStock, buyShares);
+                        break;
+                    case 'sell':
+                        if (parts.length < 3) {
+                            print('Usage: sell [stock] [shares]');
+                            break;
+                        }
+                        const sellStock = parts[1];
+                        const sellShares = parseInt(parts[2]);
+                        
+                        if (isNaN(sellShares) || sellShares <= 0) {
+                            print('Invalid number of shares');
+                            break;
+                        }
+                        
+                        sellStonks(sellStock, sellShares);
+                        break;
+                    default:
+                        print('Unknown command. Type "help"');
+                        break;
+                }
             }
         }
 
@@ -682,8 +878,19 @@ Current credits: $100
         // Load game on startup
         loadGame();
         
+        // Ensure input stays focused
+        function keepFocus() {
+            if (document.activeElement !== commandInput) {
+                commandInput.focus();
+            }
+        }
+        
+        document.addEventListener('click', keepFocus);
+        document.addEventListener('touchend', keepFocus);
+        
         setTimeout(() => {
             print('Ready. Type "help" for commands.');
+            commandInput.focus();
             saveGame(); // Initial save
         }, 1000);
     </script>
