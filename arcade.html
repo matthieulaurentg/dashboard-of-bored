@@ -44,6 +44,12 @@
             background: #ffffff;
         }
         
+        @media (max-width: 768px) {
+            .terminal::-webkit-scrollbar {
+                display: none;
+            }
+        }
+        
         .input-section {
             position: fixed;
             bottom: 0;
@@ -104,9 +110,11 @@
         
         @media (max-width: 768px) {
             .terminal {
-                height: calc(100vh - 200px);
+                height: calc(100vh - 60px);
                 padding: 10px;
                 font-size: 13px;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
             }
             
             .input-section {
@@ -120,21 +128,22 @@
             }
             
             .mobile-buttons {
-                display: block;
+                display: none;
             }
         }
         
         @media (max-width: 480px) {
             .terminal {
-                height: calc(100vh - 220px);
+                height: calc(100vh - 60px);
                 padding: 8px;
                 font-size: 12px;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
             }
             
-            .mobile-btn {
-                font-size: 11px;
-                padding: 6px 8px;
-                min-width: 50px;
+            .input {
+                font-size: 16px;
+                padding: 12px;
             }
         }
     </style>
