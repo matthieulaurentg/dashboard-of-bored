@@ -1,146 +1,82 @@
-# 🎰 Three Card Roulette
+# 🎰 Three Card Roulette - Web Game
 
-A feature-rich casino card game combining traditional roulette mechanics with real-time stock trading and an achievement system. Play in 4 languages with auto-save functionality!
+A unique fusion of casino card gaming and real-time stock market trading, now available as a web application.
 
-## 🎮 Game Features
+## 🎮 How to Play
 
-### 🃏 Card Game Modes
-- **Color Betting**: Bet on Red or Black cards (2:1 payout)
-- **Exact Suit Betting**: Bet on specific suits (3:1 payout)  
-- **Multiple Bets**: Place several bets simultaneously
-- **Joker Mechanic**: Jokers trigger re-draws (no win/loss)
+Simply open `index.html` in your web browser and start playing!
 
-### 📈 Stock Trading System
-- **Real-time Market**: 5 companies with dynamic pricing
-- **Buy & Sell Shares**: Full control over your portfolio
-- **Realistic Volatility**: Each stock has different risk levels
-- **Portfolio Tracking**: Monitor your investments
+### Game Features
 
-### 🏆 Achievement System
-- **All Gamemode Achiever**: Win in every game mode
-- **Triple Rare**: Get 3 Jokers in a row
-- **Millionaire**: Reach $1000+ balance
-- **Stock Master**: Own 100+ shares
+- **Card Betting**: Color bets (Red/Black) with 2:1 payout, Exact suit bets with 3:1 payout
+- **Stock Trading**: Buy and sell shares in 5 companies with dynamic pricing
+- **Multi-Language**: Support for 9 languages (English, Spanish, French, German, Italian, Portuguese, Russian, Japanese, Chinese)
+- **Auto-Save**: Your progress is automatically saved in your browser
+- **Statistics Tracking**: Complete game statistics and achievements
+- **Responsive Design**: Works on desktop, tablet, and mobile
 
-### 🌍 Multi-Language Support
+### Game Rules
+
+1. **Color Betting**: Bet on Red or Black cards. Win if the drawn card matches your color choice.
+2. **Exact Card Betting**: Bet on specific suits (Hearts, Diamonds, Clubs, Spades). Higher payout but lower chance.
+3. **Jokers**: If a Joker is drawn, your bet is refunded and you get another draw.
+4. **Stock Trading**: Buy low, sell high. Stock prices fluctuate every 30 seconds.
+5. **Game Over**: If you reach $0, the game restarts with $100.
+
+## 🚀 Quick Start
+
+1. Download or clone this repository
+2. Open `index.html` in any modern web browser
+3. Select your language
+4. Start playing!
+
+## 💾 Auto-Save Features
+
+- Game automatically saves after every action
+- Save indicator appears in top-right corner
+- Auto-save every 30 seconds during gameplay
+- Progress persists between browser sessions
+
+## 📱 Compatibility
+
+- **Desktop**: Chrome, Firefox, Safari, Edge
+- **Mobile**: iOS Safari, Android Chrome
+- **Requirements**: Modern browser with JavaScript enabled
+
+## 🎯 Game Statistics
+
+Track your performance with detailed statistics:
+- Total bets, wins, and losses
+- Highest balance achieved
+- Portfolio value and stock holdings
+- Achievement progress
+
+## 🏆 Achievements
+
+Unlock trophies by reaching milestones in the game.
+
+## 🌍 Multi-Language Support
+
+Available in 9 languages:
 - English
 - Español (Spanish)
-- Français (French) 
+- Français (French)
 - Deutsch (German)
+- Italiano (Italian)
+- Português (Portuguese)
+- Русский (Russian)
+- 日本語 (Japanese)
+- 中文 (Chinese)
 
-## 📦 Installation
+## 🔧 Technical Details
 
-### Quick Install (Recommended)
-```bash
-pip install three-card-roulette
-```
-
-### From Source
-```bash
-git clone https://github.com/matthieu/three-card-roulette.git
-cd three-card-roulette
-pip install -r requirements.txt
-python setup.py install
-```
-
-## 🚀 Running the Game
-
-### Command Line
-```bash
-# Full name
-three-card-roulette
-
-# Short alias
-tcr
-
-# Or directly with Python
-python game.py
-```
-
-## 🎯 How to Play
-
-1. **Choose Language**: Select from 4 available languages
-2. **Main Menu**: Navigate between card games, stock trading, and inventory
-3. **Card Games**: Place bets and try your luck
-4. **Stock Trading**: Buy/sell shares to grow your portfolio
-5. **Achievements**: Unlock trophies by completing challenges
-
-## 📊 Game Statistics
-
-The game tracks comprehensive statistics:
-- Total bets placed and win rate
-- Money won/lost and net profit
-- Achievement progress
-- Session statistics
-
-## 💾 Save System
-
-- **Auto-save**: Game saves after every bet and trade
-- **Persistent Data**: Your progress is preserved between sessions
-- **Cross-Platform**: Save files work on Windows, Mac, and Linux
-
-## 🔄 Auto-Updates
-
-The game includes an automatic update system:
-- Checks for new versions on startup
-- One-click updates from within the game
-- Automatic backup of your save data
-
-## 🛠️ Development
-
-### Project Structure
-```
-three-card-roulette/
-├── game.py          # Main game controller
-├── languages.py     # Multi-language translations
-├── stock_market.py  # Stock trading system
-├── achievements.py  # Trophy and inventory system
-├── card_game.py     # Card game mechanics
-├── updater.py       # Auto-update system
-├── setup.py         # Package installation
-└── requirements.txt # Dependencies
-```
-
-### Building from Source
-```bash
-# Install development dependencies
-pip install -r requirements.txt
-
-# Build package
-python setup.py sdist bdist_wheel
-
-# Install locally
-pip install -e .
-```
-
-## 📋 Requirements
-
-- Python 3.7 or higher
-- Internet connection (for auto-updates and first-time setup)
-- Terminal/Command Prompt
-
-## 🎨 Credits
-
-- **Game Design**: Matthieu
-- **Programming**: Powered by Claude AI
-- **Multi-language Support**: Community translations
-
-## 📄 License
-
-MIT License - Feel free to modify and distribute!
-
-## 🐛 Bug Reports
-
-Found a bug? Please report it on our [GitHub Issues](https://github.com/matthieu/three-card-roulette/issues) page.
-
-## 🎯 Roadmap
-
-- [ ] Online multiplayer mode
-- [ ] More stock companies
-- [ ] Additional achievement types
-- [ ] Custom card themes
-- [ ] Mobile app version
+- **Pure HTML/CSS/JavaScript** - No external dependencies
+- **Local Storage** - Saves game state in browser
+- **Responsive Design** - Auto-adjusts to screen size
+- **Real-time Updates** - Stock prices update dynamically
 
 ---
 
-**Enjoy the game!** 🎮✨
+**Created by**: Matthieu  
+**Powered by**: Claude AI  
+**Version**: Web 1.0

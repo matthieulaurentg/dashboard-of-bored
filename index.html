@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matthieu's Text Arcade</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #ffffff;
+            font-size: 14px;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .output {
+            min-height: 400px;
+            border: 1px solid #333;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #111;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .input-section {
+            display: flex;
+            gap: 10px;
+        }
+        
+        input {
+            flex: 1;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            background: #222;
+            color: #fff;
+            border: 1px solid #333;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="output" id="output"></div>
+        <div class="input-section">
+            <input type="text" id="commandInput" placeholder="Enter command">
+            <button onclick="processCommand()">Execute</button>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            balance: 100,
+            totalBets: 0,
+            totalWins: 0,
+            totalLosses: 0,
+            lastCard: null,
+            lastResult: null
+        };
+
+        const output = document.getElementById('output');
+        const commandInput = document.getElementById('commandInput');
+
+        function print(text) {
+            output.textContent += text + '\n';
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            output.textContent = '';
+        }
+
+        function showHelp() {
+            print('THREE CARD ROULETTE COMMANDS:');
+            print('help - Show this help');
+            print('balance - Show current balance');
+            print('stats - Show game statistics');
+            print('bet red [amount] - Bet on red cards');
+            print('bet black [amount] - Bet on black cards');
+            print('bet hearts [amount] - Bet on hearts');
+            print('bet diamonds [amount] - Bet on diamonds');
+            print('bet clubs [amount] - Bet on clubs');
+            print('bet spades [amount] - Bet on spades');
+            print('rules - Show game rules');
+            print('clear - Clear screen');
+            print('quit - Exit game');
+            print('');
+        }
+
+        function showBalance() {
+            print('Current Balance: $' + gameState.balance);
+            print('');
+        }
+
+        function showStats() {
+            print('GAME STATISTICS:');
+            print('Total Bets: ' + gameState.totalBets);
+            print('Total Wins: ' + gameState.totalWins);
+            print('Total Losses: ' + gameState.totalLosses);
+            const winRate = gameState.totalBets > 0 ? ((gameState.totalWins / gameState.totalBets) * 100).toFixed(1) : 0;
+            print('Win Rate: ' + winRate + '%');
+            if (gameState.lastCard) {
+                print('Last Card: ' + gameState.lastCard);
+                print('Last Result: ' + gameState.lastResult);
+            }
+            print('');
+        }
+
+        function showRules() {
+            print('THREE CARD ROULETTE RULES:');
+            print('Deck: Hearts, Diamonds, Clubs, Spades, Joker');
+            print('Color Bets (2:1 payout): red, black');
+            print('Exact Bets (3:1 payout): hearts, diamonds, clubs, spades');
+            print('Joker: All bets refunded');
+            print('Minimum bet: $1');
+            print('');
+        }
+
+        function processBet(betType, amount) {
+            if (amount < 1) {
+                print('Minimum bet is $1');
+                return;
+            }
+            
+            if (amount > gameState.balance) {
+                print('Insufficient funds. Balance: $' + gameState.balance);
+                return;
+            }
+
+            gameState.balance -= amount;
+            gameState.totalBets++;
+
+            const cards = ['hearts', 'diamonds', 'clubs', 'spades', 'joker'];
+            const drawnCard = cards[Math.floor(Math.random() * cards.length)];
+            gameState.lastCard = drawnCard;
+
+            print('Bet: ' + betType + ' $' + amount);
+            print('Card drawn: ' + drawnCard);
+
+            if (drawnCard === 'joker') {
+                gameState.balance += amount;
+                gameState.lastResult = 'refund';
+                print('Joker! Bet refunded.');
+            } else {
+                let won = false;
+                let payout = 0;
+
+                if (betType === 'red' && (drawnCard === 'hearts' || drawnCard === 'diamonds')) {
+                    won = true;
+                    payout = amount * 2;
+                } else if (betType === 'black' && (drawnCard === 'clubs' || drawnCard === 'spades')) {
+                    won = true;
+                    payout = amount * 2;
+                } else if (betType === drawnCard) {
+                    won = true;
+                    payout = amount * 3;
+                }
+
+                if (won) {
+                    gameState.balance += payout;
+                    gameState.totalWins++;
+                    gameState.lastResult = 'win $' + payout;
+                    print('WIN! Payout: $' + payout);
+                } else {
+                    gameState.totalLosses++;
+                    gameState.lastResult = 'loss $' + amount;
+                    print('LOSS! Lost: $' + amount);
+                }
+            }
+
+            print('New balance: $' + gameState.balance);
+
+            if (gameState.balance <= 0) {
+                print('Game over! Restarting with $100');
+                gameState.balance = 100;
+            }
+            print('');
+        }
+
+        function processCommand() {
+            const command = commandInput.value.trim().toLowerCase();
+            if (!command) return;
+
+            print('> ' + command);
+            commandInput.value = '';
+
+            const parts = command.split(' ');
+            const cmd = parts[0];
+
+            switch (cmd) {
+                case 'help':
+                    showHelp();
+                    break;
+                case 'balance':
+                    showBalance();
+                    break;
+                case 'stats':
+                    showStats();
+                    break;
+                case 'rules':
+                    showRules();
+                    break;
+                case 'clear':
+                    clearOutput();
+                    break;
+                case 'quit':
+                    print('Thanks for playing!');
+                    commandInput.disabled = true;
+                    break;
+                case 'bet':
+                    if (parts.length < 3) {
+                        print('Usage: bet [type] [amount]');
+                        print('Example: bet red 25');
+                        break;
+                    }
+                    const betType = parts[1];
+                    const amount = parseInt(parts[2]);
+                    
+                    if (isNaN(amount)) {
+                        print('Invalid amount');
+                        break;
+                    }
+
+                    const validBets = ['red', 'black', 'hearts', 'diamonds', 'clubs', 'spades'];
+                    if (!validBets.includes(betType)) {
+                        print('Invalid bet type. Valid: red, black, hearts, diamonds, clubs, spades');
+                        break;
+                    }
+
+                    processBet(betType, amount);
+                    break;
+                default:
+                    print('Unknown command. Type "help" for commands.');
+                    break;
+            }
+        }
+
+        commandInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                processCommand();
+            }
+        });
+
+        // Initialize
+        print('THREE CARD ROULETTE');
+        print('Type "help" for commands or "bet [type] [amount]" to play');
+        print('Current balance: $' + gameState.balance);
+        print('');
+        commandInput.focus();
+    </script>
+</body>
+</html>
