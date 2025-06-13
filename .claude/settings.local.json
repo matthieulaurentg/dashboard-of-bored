@@ -14,7 +14,8 @@
       "Bash(cat:*)",
       "WebFetch(domain:matthieulaurentg.github.io)",
       "WebFetch(domain:github.com)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }
