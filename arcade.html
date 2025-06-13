@@ -184,13 +184,13 @@ Current credits: $100
         };
         
         let adventureState = {
-            location: 'forest_entrance',
+            location: 'start',
             inventory: [],
             health: 100,
             score: 0,
             visitedLocations: [],
             gameFlags: {},
-            generatedLocations: {}
+            activeQuests: []
         };
         
         let stonksState = {
@@ -263,133 +263,129 @@ Current credits: $100
             }
         }, 15000);
         
-        // Adventure Game - Infinite AI Generated Locations
-        const baseLocations = {
-            forest_entrance: {
+        // Adventure Game - Massive World with 1000+ Locations
+        const gameWorld = {};
+        
+        // Massive location database - 1000+ unique areas
+        function generateMassiveWorld() {
+            const biomes = ['forest', 'mountain', 'desert', 'swamp', 'plains', 'coast', 'ruins', 'cave', 'village', 'castle'];
+            const adjectives = ['ancient', 'dark', 'mysterious', 'haunted', 'peaceful', 'dangerous', 'hidden', 'frozen', 'burning', 'crystal', 'golden', 'silver', 'emerald', 'shadow', 'bright', 'misty', 'windy', 'quiet', 'noisy', 'sacred'];
+            const descriptors = ['grove', 'peak', 'valley', 'river', 'lake', 'bridge', 'tower', 'gate', 'path', 'clearing', 'ruins', 'temple', 'mine', 'camp', 'fort', 'garden', 'marsh', 'cliff', 'cavern', 'tunnel'];
+            
+            const itemPool = [
+                'ancient_key', 'magic_scroll', 'healing_herb', 'silver_coin', 'rusty_sword', 'glowing_gem', 
+                'old_map', 'rope', 'lantern', 'mysterious_amulet', 'iron_shield', 'spell_book', 
+                'health_potion', 'golden_ring', 'crystal_shard', 'enchanted_bow', 'dragon_scale',
+                'phoenix_feather', 'moonstone', 'star_fragment', 'blessed_water', 'ancient_tome',
+                'magic_wand', 'elven_cloak', 'dwarven_hammer', 'giant_pearl', 'cursed_skull',
+                'holy_symbol', 'demon_horn', 'angel_wing', 'time_crystal', 'void_essence'
+            ];
+            
+            for (let i = 0; i < 1200; i++) {
+                const biome = biomes[i % biomes.length];
+                const adj = adjectives[Math.floor(i / 3) % adjectives.length];
+                const desc = descriptors[Math.floor(i / 7) % descriptors.length];
+                
+                const locationId = `loc_${i}`;
+                const name = `${adj.charAt(0).toUpperCase() + adj.slice(1)} ${biome.charAt(0).toUpperCase() + biome.slice(1)} ${desc.charAt(0).toUpperCase() + desc.slice(1)}`;
+                
+                // Generate unique descriptions
+                const descriptions = {
+                    forest: ['Ancient trees tower overhead, their massive trunks disappearing into misty heights.', 'Dappled sunlight filters through the canopy, creating patterns of light and shadow.', 'The forest floor is carpeted with fallen leaves that crunch beneath your feet.'],
+                    mountain: ['Rocky peaks stretch endlessly toward the sky, their summits lost in clouds.', 'The thin air makes breathing difficult as you navigate the treacherous paths.', 'Snow and ice glisten on the higher elevations, reflecting the sunlight.'],
+                    desert: ['Endless dunes of golden sand stretch to the horizon in every direction.', 'The scorching sun beats down mercilessly on the barren landscape.', 'Ancient ruins peek through the shifting sands, weathered by countless storms.'],
+                    swamp: ['Murky water reflects twisted trees draped in hanging moss.', 'Strange sounds echo through the humid air as unseen creatures move nearby.', 'The ground squelches beneath your feet with every step.'],
+                    plains: ['Rolling grasslands extend as far as the eye can see.', 'Wildflowers dot the landscape in brilliant patches of color.', 'A gentle breeze causes the grass to wave like an ocean of green.'],
+                    coast: ['Waves crash against the rocky shoreline, sending spray high into the air.', 'Seagulls cry overhead as they dive for fish in the churning waters.', 'Salt air fills your lungs with each breath.'],
+                    ruins: ['Crumbling stone structures hint at a once-great civilization.', 'Vines and vegetation have reclaimed much of the ancient architecture.', 'Strange symbols are carved into weathered walls and fallen pillars.'],
+                    cave: ['Stalactites hang like teeth from the cavern ceiling above.', 'Your footsteps echo endlessly in the dark tunnels.', 'Strange formations of rock create an alien landscape underground.'],
+                    village: ['Small houses with smoking chimneys line cobblestone streets.', 'Villagers go about their daily routines, nodding politely as you pass.', 'Market stalls offer various goods and the aroma of fresh bread fills the air.'],
+                    castle: ['Massive stone walls rise imposingly against the sky.', 'Banners flutter from tall towers in the mountain breeze.', 'Guards patrol the battlements, keeping watch for threats.']
+                };
+                
+                const desc_options = descriptions[biome] || ['A mysterious location that defies easy description.'];
+                const description = desc_options[i % desc_options.length];
+                
+                // Random items (20% chance)
+                const items = [];
+                if ((i * 17) % 100 < 20) {
+                    items.push(itemPool[(i * 23) % itemPool.length]);
+                }
+                
+                // Generate truly random exits (2-5 exits per location)
+                const directions = ['north', 'south', 'east', 'west', 'northeast', 'northwest', 'southeast', 'southwest', 'up', 'down'];
+                const exits = {};
+                const numExits = 2 + (i % 4);
+                
+                for (let j = 0; j < numExits; j++) {
+                    const direction = directions[(i + j * 7) % directions.length];
+                    // Connect to different random locations
+                    const targetId = `loc_${(i + (j + 1) * 37 + (i % 10) * 13) % 1200}`;
+                    exits[direction] = targetId;
+                }
+                
+                gameWorld[locationId] = {
+                    name: name,
+                    description: description,
+                    exits: exits,
+                    items: items,
+                    firstVisit: `You discover ${name} for the first time.`,
+                    hasQuest: (i * 11) % 100 < 15, // 15% chance of quest
+                    questCompleted: false
+                };
+            }
+            
+            // Set starting location
+            gameWorld['start'] = {
                 name: 'Forest Entrance',
-                description: 'You stand at the edge of a dark forest. A narrow path leads deeper into the woods. To your left is an old wooden sign.',
-                exits: { north: 'deep_forest', east: 'village' },
-                items: [],
-                firstVisit: 'The ancient trees tower above you, their branches creaking in the wind.'
-            }
-        };
-        
-        const locationTemplates = [
-            {
-                types: ['forest', 'woods', 'grove', 'thicket'],
-                adjectives: ['dark', 'mysterious', 'ancient', 'enchanted', 'misty', 'silent', 'dense'],
-                descriptions: [
-                    'Tall trees surround you, their branches forming a canopy overhead.',
-                    'Shadows dance between the tree trunks as wind rustles the leaves.',
-                    'The air is thick with the scent of earth and growing things.',
-                    'Strange sounds echo from deeper in the wilderness.',
-                    'Moss-covered stones and fallen logs create natural obstacles.'
-                ]
-            },
-            {
-                types: ['cave', 'cavern', 'grotto', 'tunnel'],
-                adjectives: ['dark', 'echoing', 'damp', 'crystal-filled', 'narrow', 'deep', 'glowing'],
-                descriptions: [
-                    'The walls glisten with moisture and mineral deposits.',
-                    'Your footsteps echo in the cool, damp air.',
-                    'Strange formations jut from the ceiling and floor.',
-                    'A faint breeze suggests passages leading deeper.',
-                    'Crystals embedded in the walls provide an eerie glow.'
-                ]
-            },
-            {
-                types: ['village', 'town', 'settlement', 'hamlet'],
-                adjectives: ['peaceful', 'bustling', 'quiet', 'ancient', 'remote', 'friendly', 'mysterious'],
-                descriptions: [
-                    'Small buildings with thatched roofs line winding paths.',
-                    'Villagers go about their daily business with purpose.',
-                    'Smoke rises from chimneys, carrying the scent of cooking food.',
-                    'Market stalls display various goods and wares.',
-                    'Children play in the dusty streets between houses.'
-                ]
-            },
-            {
-                types: ['mountain', 'peak', 'cliff', 'ridge'],
-                adjectives: ['towering', 'snow-capped', 'rocky', 'steep', 'windswept', 'treacherous', 'majestic'],
-                descriptions: [
-                    'The path winds dangerously along the mountain face.',
-                    'Far below, the world spreads out in miniature.',
-                    'Cold winds whip across the exposed stone.',
-                    'Eagles circle high overhead in the clear air.',
-                    'The view from here is breathtaking and dizzying.'
-                ]
-            }
-        ];
-        
-        const itemTemplates = [
-            'ancient_key', 'magic_scroll', 'healing_herb', 'silver_coin', 'rusty_sword', 
-            'glowing_gem', 'old_map', 'rope', 'lantern', 'mysterious_amulet',
-            'iron_shield', 'spell_book', 'health_potion', 'golden_ring', 'crystal_shard'
-        ];
-        
-        function generateLocation(seed) {
-            const template = locationTemplates[seed % locationTemplates.length];
-            const type = template.types[Math.floor(seed / 10) % template.types.length];
-            const adj = template.adjectives[Math.floor(seed / 100) % template.adjectives.length];
-            const desc = template.descriptions[Math.floor(seed / 1000) % template.descriptions.length];
-            
-            const locationId = adj + '_' + type + '_' + seed;
-            const name = adj.charAt(0).toUpperCase() + adj.slice(1) + ' ' + 
-                        type.charAt(0).toUpperCase() + type.slice(1);
-            
-            // Generate items (30% chance)
-            const items = [];
-            if ((seed * 7) % 10 < 3) {
-                const item = itemTemplates[(seed * 13) % itemTemplates.length];
-                items.push(item);
-            }
-            
-            return {
-                id: locationId,
-                name: name,
-                description: desc,
-                items: items,
-                firstVisit: 'You discover this new area for the first time.',
-                isGenerated: true
+                description: 'You stand at the edge of a vast world full of adventure. Paths lead in multiple directions.',
+                exits: { north: 'loc_1', east: 'loc_2', south: 'loc_3', west: 'loc_4' },
+                items: ['map_fragment'],
+                firstVisit: 'Your adventure begins here. The world awaits your exploration!',
+                hasQuest: false,
+                questCompleted: false
             };
         }
         
-        function getOrCreateLocation(locationId) {
-            if (baseLocations[locationId]) {
-                return baseLocations[locationId];
-            }
-            
-            if (adventureState.generatedLocations && adventureState.generatedLocations[locationId]) {
-                return adventureState.generatedLocations[locationId];
-            }
-            
-            // Generate new location
-            const seed = locationId.split('_').reduce((acc, part, i) => acc + part.charCodeAt(0) * (i + 1), 0);
-            const newLocation = generateLocation(seed);
-            
-            if (!adventureState.generatedLocations) {
-                adventureState.generatedLocations = {};
-            }
-            
-            adventureState.generatedLocations[locationId] = newLocation;
-            return newLocation;
+        // Quest system
+        const questDatabase = [
+            { id: 'find_crystal', name: 'Crystal Hunter', description: 'Find 3 crystal shards', reward: 'enchanted_bow', progress: 0, target: 3 },
+            { id: 'explore_ruins', name: 'Ancient Explorer', description: 'Visit 5 different ruins', reward: 'ancient_tome', progress: 0, target: 5 },
+            { id: 'collect_gems', name: 'Gem Collector', description: 'Collect 10 precious gems', reward: 'dragon_scale', progress: 0, target: 10 },
+            { id: 'mountain_climber', name: 'Peak Seeker', description: 'Reach 3 mountain peaks', reward: 'phoenix_feather', progress: 0, target: 3 },
+            { id: 'cave_explorer', name: 'Depths Walker', description: 'Explore 7 different caves', reward: 'void_essence', progress: 0, target: 7 }
+        ];
+        
+        function getLocation(locationId) {
+            return gameWorld[locationId] || null;
         }
         
-        function generateExits(currentLocationId) {
-            const directions = ['north', 'south', 'east', 'west', 'northeast', 'northwest', 'southeast', 'southwest'];
-            const exits = {};
-            
-            // Always generate 2-4 exits
-            const numExits = 2 + (currentLocationId.charCodeAt(0) % 3);
-            
-            for (let i = 0; i < numExits; i++) {
-                const direction = directions[i % directions.length];
-                const seed = currentLocationId.charCodeAt(i % currentLocationId.length) + i * 100;
-                const exitId = 'gen_' + seed;
-                exits[direction] = exitId;
+        function showMap() {
+            print('=== DISCOVERED LOCATIONS MAP ===');
+            const visited = adventureState.visitedLocations;
+            if (visited.length === 0) {
+                print('No locations discovered yet.');
+                return;
             }
             
-            return exits;
+            const locationsByType = {};
+            visited.forEach(locId => {
+                const loc = getLocation(locId);
+                if (loc) {
+                    const type = loc.name.split(' ')[1] || 'Unknown';
+                    if (!locationsByType[type]) locationsByType[type] = [];
+                    locationsByType[type].push(loc.name);
+                }
+            });
+            
+            Object.keys(locationsByType).forEach(type => {
+                print(`${type.toUpperCase()}:`);
+                locationsByType[type].forEach(name => {
+                    print(`  - ${name}`);
+                });
+            });
+            print(`Total locations discovered: ${visited.length}/1200`);
+            print('');
         }
 
         function print(text) {
@@ -426,6 +422,8 @@ Current credits: $100
                 print('use [item] - Use item');
                 print('talk - Talk to people');
                 print('status - Show status');
+                print('map - Show discovered locations');
+                print('quests - Show active quests');
                 print('roulette - Switch to roulette');
                 print('stonks - Switch to stonks');
                 print('clear - Clear screen');
@@ -447,8 +445,12 @@ Current credits: $100
         }
         
         function describeLocation() {
-            const loc = getOrCreateLocation(adventureState.location);
-            const exits = loc.exits || generateExits(adventureState.location);
+            const loc = getLocation(adventureState.location);
+            if (!loc) {
+                print('ERROR: Location not found!');
+                adventureState.location = 'start';
+                return;
+            }
             
             print('=== ' + loc.name.toUpperCase() + ' ===');
             
@@ -460,11 +462,15 @@ Current credits: $100
             
             print(loc.description);
             
+            if (loc.hasQuest && !loc.questCompleted) {
+                print('🎯 QUEST AVAILABLE: Talk to someone here!');
+            }
+            
             if (loc.items && loc.items.length > 0) {
                 print('Items: ' + loc.items.join(', '));
             }
             
-            const exitList = Object.keys(exits);
+            const exitList = Object.keys(loc.exits);
             if (exitList.length > 0) {
                 print('Exits: ' + exitList.join(', '));
             }
@@ -472,11 +478,14 @@ Current credits: $100
         }
         
         function movePlayer(direction) {
-            const loc = getOrCreateLocation(adventureState.location);
-            const exits = loc.exits || generateExits(adventureState.location);
+            const loc = getLocation(adventureState.location);
+            if (!loc) {
+                print('ERROR: Current location not found!');
+                return;
+            }
             
-            if (exits[direction]) {
-                adventureState.location = exits[direction];
+            if (loc.exits[direction]) {
+                adventureState.location = loc.exits[direction];
                 print('Moving...');
                 describeLocation();
             } else {
@@ -485,8 +494,11 @@ Current credits: $100
         }
         
         function takeItem(item) {
-            const loc = getOrCreateLocation(adventureState.location);
-            if (!loc.items) loc.items = [];
+            const loc = getLocation(adventureState.location);
+            if (!loc || !loc.items) {
+                print('Item not found.');
+                return;
+            }
             
             const itemIndex = loc.items.indexOf(item);
             if (itemIndex !== -1) {
@@ -494,7 +506,7 @@ Current credits: $100
                 adventureState.inventory.push(item);
                 adventureState.score += 5;
                 print('Taken: ' + item);
-                saveGame(); // Auto-save after taking item
+                saveGame();
             } else {
                 print('Item not found.');
             }
@@ -553,33 +565,44 @@ Current credits: $100
         }
         
         function talkToCharacters() {
-            const loc = getOrCreateLocation(adventureState.location);
+            const loc = getLocation(adventureState.location);
+            if (!loc) {
+                print('No one to talk to.');
+                return;
+            }
             
-            // Generate random NPCs in generated locations
-            if (loc.isGenerated) {
-                const npcTypes = ['traveler', 'merchant', 'hermit', 'guard', 'local'];
+            if (loc.hasQuest && !loc.questCompleted) {
+                // Give quest
+                const questIndex = adventureState.location.charCodeAt(0) % questDatabase.length;
+                const quest = questDatabase[questIndex];
+                if (!adventureState.activeQuests) adventureState.activeQuests = [];
+                
+                if (!adventureState.activeQuests.find(q => q.id === quest.id)) {
+                    adventureState.activeQuests.push({...quest});
+                    print(`Quest Giver: "I have a task for you!"`);
+                    print(`🎯 NEW QUEST: ${quest.name}`);
+                    print(`   ${quest.description}`);
+                    print(`   Reward: ${quest.reward}`);
+                    loc.questCompleted = true;
+                } else {
+                    print('Quest Giver: "You already have this quest!"');
+                }
+            } else {
+                // Random NPC dialogue
                 const npcDialogue = [
                     'Traveler: "The path ahead is treacherous, be careful."',
                     'Merchant: "I have rare goods if you have coin."',
                     'Hermit: "Few venture to these parts anymore."',
                     'Guard: "State your business here."',
-                    'Local: "You\'re not from around here, are you?"'
+                    'Local: "You\'re not from around here, are you?"',
+                    'Adventurer: "I\'ve seen many wonders in my travels."',
+                    'Scholar: "These ruins hold ancient secrets."',
+                    'Ranger: "The wildlife here is quite unique."'
                 ];
                 
                 const seed = adventureState.location.charCodeAt(0) % npcDialogue.length;
-                if ((seed * 3) % 10 < 4) { // 40% chance of NPC
+                if ((seed * 3) % 10 < 6) { // 60% chance of NPC
                     print(npcDialogue[seed]);
-                } else {
-                    print('No one to talk to.');
-                }
-            } else {
-                // Original locations
-                if (adventureState.location === 'village_center') {
-                    print('Wizard: "Bring me a crystal for reward."');
-                } else if (adventureState.location === 'shop') {
-                    print('Shopkeeper: "I accept coins for items."');
-                } else if (adventureState.location === 'village') {
-                    print('Villager: "Be careful in the forest."');
                 } else {
                     print('No one to talk to.');
                 }
@@ -587,13 +610,20 @@ Current credits: $100
         }
         
         function showAdventureStatus() {
-            const loc = getOrCreateLocation(adventureState.location);
+            const loc = getLocation(adventureState.location);
             print('STATUS:');
             print('Health: ' + adventureState.health + '/100');
             print('Score: ' + adventureState.score);
-            print('Location: ' + loc.name);
+            print('Location: ' + (loc ? loc.name : 'Unknown'));
             print('Inventory: ' + (adventureState.inventory.length > 0 ? adventureState.inventory.join(', ') : 'Empty'));
-            print('Locations discovered: ' + adventureState.visitedLocations.length);
+            print('Locations discovered: ' + adventureState.visitedLocations.length + '/1200');
+            
+            if (adventureState.activeQuests && adventureState.activeQuests.length > 0) {
+                print('Active Quests:');
+                adventureState.activeQuests.forEach(quest => {
+                    print(`  - ${quest.name}: ${quest.progress}/${quest.target}`);
+                });
+            }
             print('');
         }
 
@@ -918,6 +948,22 @@ Current credits: $100
                     case 'status':
                         showAdventureStatus();
                         break;
+                    case 'map':
+                        showMap();
+                        break;
+                    case 'quests':
+                        if (adventureState.activeQuests && adventureState.activeQuests.length > 0) {
+                            print('ACTIVE QUESTS:');
+                            adventureState.activeQuests.forEach(quest => {
+                                print(`🎯 ${quest.name}: ${quest.progress}/${quest.target}`);
+                                print(`   ${quest.description}`);
+                                print(`   Reward: ${quest.reward}`);
+                            });
+                        } else {
+                            print('No active quests. Talk to NPCs to find quests!');
+                        }
+                        print('');
+                        break;
                     default:
                         print('Unknown command. Type "help"');
                         break;
@@ -1016,6 +1062,9 @@ Current credits: $100
             }
         });
 
+        // Initialize the massive game world
+        generateMassiveWorld();
+        
         // Load game on startup
         loadGame();
         
@@ -1031,6 +1080,7 @@ Current credits: $100
         
         setTimeout(() => {
             print('Ready. Type "help" for commands.');
+            print('🌍 Massive world generated: 1200 unique locations to explore!');
             commandInput.focus();
             saveGame(); // Initial save
         }, 1000);
