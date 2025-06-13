@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Console</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>"
     <style>
         * {
             margin: 0;
@@ -215,6 +216,9 @@ Current credits: $100
         const terminal = document.getElementById('terminal');
         const commandInput = document.getElementById('commandInput');
         
+        let commandHistory = [];
+        let historyIndex = -1;
+        
         function quickCommand(cmd) {
             commandInput.value = cmd;
             processCommand();
@@ -250,6 +254,14 @@ Current credits: $100
         
         // Auto-save every 10 seconds
         setInterval(saveGame, 10000);
+        
+        // Real-time stock price updates every 15 seconds
+        setInterval(() => {
+            if (currentGame === 'stonks') {
+                updateMarketPrices();
+                print('💰 Market prices updated automatically');
+            }
+        }, 15000);
         
         // Adventure Game Locations
         const locations = {
@@ -605,12 +617,19 @@ Current credits: $100
         
         function updateMarketPrices() {
             const stocks = Object.keys(stonksState.prices);
+            let hasChanges = false;
             stocks.forEach(stock => {
                 const change = (Math.random() - 0.5) * 20; // -10 to +10
                 const newPrice = Math.max(10, stonksState.prices[stock] + change);
-                stonksState.prices[stock] = Math.round(newPrice * 100) / 100;
+                const roundedPrice = Math.round(newPrice * 100) / 100;
+                if (roundedPrice !== stonksState.prices[stock]) {
+                    hasChanges = true;
+                }
+                stonksState.prices[stock] = roundedPrice;
             });
-            print('Market prices updated!');
+            if (hasChanges) {
+                print('Market prices updated!');
+            }
         }
         
         function showPrices() {
@@ -700,6 +719,15 @@ Current credits: $100
         function processCommand() {
             const command = commandInput.value.trim().toLowerCase();
             if (!command) return;
+
+            // Add to command history
+            if (commandHistory.length === 0 || commandHistory[commandHistory.length - 1] !== command) {
+                commandHistory.push(command);
+                if (commandHistory.length > 50) { // Keep last 50 commands
+                    commandHistory.shift();
+                }
+            }
+            historyIndex = -1;
 
             print('> ' + command);
             commandInput.value = '';
@@ -856,9 +884,30 @@ Current credits: $100
             }
         }
 
-        commandInput.addEventListener('keypress', function(e) {
+        commandInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 processCommand();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (commandHistory.length > 0) {
+                    if (historyIndex === -1) {
+                        historyIndex = commandHistory.length - 1;
+                    } else if (historyIndex > 0) {
+                        historyIndex--;
+                    }
+                    commandInput.value = commandHistory[historyIndex];
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex !== -1) {
+                    if (historyIndex < commandHistory.length - 1) {
+                        historyIndex++;
+                        commandInput.value = commandHistory[historyIndex];
+                    } else {
+                        historyIndex = -1;
+                        commandInput.value = '';
+                    }
+                }
             }
         });
         
