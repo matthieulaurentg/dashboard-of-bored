@@ -419,6 +419,7 @@ Current credits: $100
                 print('rules - Show rules');
                 print('adventure - Switch to adventure');
                 print('stonks - Switch to stonks');
+                print('restart - Reset all games and start fresh');
                 print('clear - Clear screen');
                 print('');
             } else if (currentGame === 'adventure') {
@@ -435,6 +436,7 @@ Current credits: $100
                 print('quests - Show active quests');
                 print('roulette - Switch to roulette');
                 print('stonks - Switch to stonks');
+                print('restart - Reset all games and start fresh');
                 print('clear - Clear screen');
                 print('');
             } else if (currentGame === 'stonks') {
@@ -448,6 +450,7 @@ Current credits: $100
                 print('stats - Show trading stats');
                 print('roulette - Switch to roulette');
                 print('adventure - Switch to adventure');
+                print('restart - Reset all games and start fresh');
                 print('clear - Clear screen');
                 print('');
             }
@@ -753,6 +756,78 @@ Current credits: $100
             saveGame(); // Auto-save on game switch
         }
         
+        function restartAllGames() {
+            print('Are you sure you want to restart? This will reset ALL progress!');
+            print('Type "confirm restart" to proceed or any other command to cancel.');
+            
+            // Set a flag to wait for confirmation
+            adventureState.awaitingRestart = true;
+        }
+        
+        function confirmRestart() {
+            // Reset all game states to defaults
+            currentGame = 'roulette';
+            
+            rouletteState = {
+                balance: 100,
+                totalBets: 0,
+                totalWins: 0,
+                totalLosses: 0,
+                lastCard: null,
+                lastResult: null
+            };
+            
+            adventureState = {
+                location: 'start',
+                inventory: [],
+                health: 100,
+                score: 0,
+                visitedLocations: [],
+                gameFlags: {},
+                activeQuests: [],
+                awaitingRestart: false
+            };
+            
+            stonksState = {
+                cash: 1000,
+                portfolio: {
+                    TSLA: 0,
+                    APPL: 0,
+                    GOOG: 0,
+                    MSFT: 0,
+                    AMZN: 0
+                },
+                prices: {
+                    TSLA: 250,
+                    APPL: 180,
+                    GOOG: 140,
+                    MSFT: 320,
+                    AMZN: 130
+                },
+                priceHistory: {},
+                totalTrades: 0,
+                totalProfit: 0
+            };
+            
+            commandHistory = [];
+            historyIndex = -1;
+            
+            // Clear localStorage
+            localStorage.removeItem('matthieu_console_save');
+            
+            // Clear terminal
+            terminal.innerHTML = '';
+            
+            print('🔄 GAME RESTARTED SUCCESSFULLY!');
+            print('All progress has been reset.');
+            print('ROULETTE GAME ACTIVE');
+            print('Current credits: $100');
+            print('Type "help" for commands.');
+            print('');
+            
+            saveGame();
+        }
+        
         function updateMarketPrices() {
             const stocks = Object.keys(stonksState.prices);
             stocks.forEach(stock => {
@@ -850,6 +925,20 @@ Current credits: $100
             const command = commandInput.value.trim().toLowerCase();
             if (!command) return;
 
+            // Check for restart confirmation
+            if (adventureState.awaitingRestart) {
+                if (command === 'confirm restart') {
+                    confirmRestart();
+                    return;
+                } else {
+                    print('> ' + command);
+                    print('Restart cancelled.');
+                    adventureState.awaitingRestart = false;
+                    commandInput.value = '';
+                    return;
+                }
+            }
+
             // Add to command history
             if (commandHistory.length === 0 || commandHistory[commandHistory.length - 1] !== command) {
                 commandHistory.push(command);
@@ -883,6 +972,10 @@ Current credits: $100
             }
             if (cmd === 'stonks') {
                 switchToStonks();
+                return;
+            }
+            if (cmd === 'restart') {
+                restartAllGames();
                 return;
             }
 
