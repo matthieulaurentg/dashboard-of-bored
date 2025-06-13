@@ -1,0 +1,4 @@
+# Three Card Roulette - Dependencies
+requests>=2.25.0
+setuptools>=50.0.0
+wheel>=0.36.0

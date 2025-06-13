@@ -1,0 +1,12 @@
+# Include important files in the package
+include README.md
+include requirements.txt
+include version.txt
+include *.py
+recursive-include * *.py
+recursive-include * *.txt
+recursive-include * *.md
+recursive-exclude * __pycache__
+recursive-exclude * *.pyc
+recursive-exclude * *.pyo
+recursive-exclude * .DS_Store
