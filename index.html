@@ -3,554 +3,672 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Matthieu's Text Arcade</title>
+    <title>Matthieu's Text - Retro Gaming Portal</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Source+Code+Pro:wght@300;400;600&display=swap');
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
         
+        :root {
+            --neon-blue: #00d4ff;
+            --neon-pink: #ff0080;
+            --neon-green: #00ff88;
+            --neon-purple: #8000ff;
+            --dark-bg: #0a0a0f;
+            --darker-bg: #050508;
+            --card-bg: #1a1a2e;
+            --text-primary: #ffffff;
+            --text-secondary: #b8b8b8;
+            --gradient-main: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-neon: linear-gradient(45deg, var(--neon-blue), var(--neon-pink), var(--neon-green));
+        }
+        
         body {
-            font-family: 'Courier New', monospace;
-            background: #000;
-            color: #ffffff;
-            font-size: 14px;
+            font-family: 'Source Code Pro', monospace;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
             line-height: 1.6;
-            padding: 20px;
         }
         
-        .game-container {
-            max-width: 800px;
+        /* Animated background grid */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--neon-blue) 1px, transparent 1px),
+                linear-gradient(90deg, var(--neon-blue) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.1;
+            animation: gridMove 20s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--neon-green);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 1; }
+        }
+        
+        /* Header */
+        .header {
+            background: var(--darker-bg);
+            border-bottom: 3px solid transparent;
+            border-image: var(--gradient-neon) 1;
+            padding: 2rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+            animation: scan 3s ease-in-out infinite;
+            opacity: 0.3;
+        }
+        
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .logo {
+            font-family: 'Orbitron', monospace;
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: var(--gradient-neon);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px var(--neon-blue);
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .tagline {
+            font-family: 'Source Code Pro', monospace;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Navigation */
+        .nav {
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            text-align: center;
+            border-bottom: 1px solid var(--neon-blue);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            margin: 0 2rem;
+            padding: 0.8rem 1.5rem;
+            border: 2px solid transparent;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-neon);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+        
+        .nav a:hover::before,
+        .nav a.active::before {
+            left: 0;
+        }
+        
+        .nav a:hover,
+        .nav a.active {
+            color: var(--dark-bg);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+        
+        /* Main container */
+        .container {
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 4rem 2rem;
         }
         
-        .output {
-            min-height: 400px;
-            border: 1px solid #333;
-            padding: 20px;
-            margin-bottom: 20px;
-            background: #111;
-            overflow-y: auto;
-            white-space: pre-wrap;
+        /* Hero section */
+        .hero {
+            text-align: center;
+            margin-bottom: 6rem;
+            position: relative;
         }
         
-        .input-section {
-            display: flex;
-            gap: 10px;
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--neon-purple) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            opacity: 0.1;
+            z-index: -1;
         }
         
-        input {
-            flex: 1;
-            padding: 10px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            background: #222;
-            color: #fff;
-            border: 1px solid #333;
+        .hero h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-green));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px var(--neon-blue);
         }
         
-        button {
-            padding: 10px 20px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            background: #333;
-            color: #fff;
-            border: 1px solid #555;
+        .hero p {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            line-height: 1.8;
+        }
+        
+        /* Game cards */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 3rem;
+            margin-bottom: 6rem;
+        }
+        
+        .game-card {
+            background: var(--card-bg);
+            border: 2px solid var(--neon-blue);
+            border-radius: 20px;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
             cursor: pointer;
         }
         
-        button:hover {
-            background: #444;
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-neon);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+        
+        .game-card:hover::before {
+            opacity: 0.1;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.3);
+            border-color: var(--neon-green);
+        }
+        
+        .game-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 0 10px currentColor);
+        }
+        
+        .game-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--neon-blue);
+        }
+        
+        .game-description {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        .game-features {
+            list-style: none;
+            margin-bottom: 2.5rem;
+        }
+        
+        .game-features li {
+            color: var(--text-secondary);
+            margin-bottom: 0.8rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .game-features li::before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: var(--neon-green);
+            font-size: 0.8rem;
+        }
+        
+        .play-button {
+            background: transparent;
+            color: var(--neon-blue);
+            border: 2px solid var(--neon-blue);
+            padding: 1rem 2.5rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .play-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--neon-blue);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+        
+        .play-button:hover::before {
+            left: 0;
+        }
+        
+        .play-button:hover {
+            color: var(--dark-bg);
+            box-shadow: 0 0 30px var(--neon-blue);
+            transform: translateY(-3px);
+        }
+        
+        /* Features section */
+        .features {
+            background: rgba(26, 26, 46, 0.5);
+            border: 1px solid var(--neon-purple);
+            border-radius: 20px;
+            padding: 4rem;
+            margin-bottom: 4rem;
+            position: relative;
+        }
+        
+        .features::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            background: var(--gradient-neon);
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0.3;
+        }
+        
+        .features h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--neon-purple);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2.5rem;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: 1px solid var(--neon-blue);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature:hover {
+            transform: scale(1.05);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            filter: drop-shadow(0 0 10px currentColor);
+        }
+        
+        .feature h3 {
+            font-family: 'Orbitron', monospace;
+            color: var(--neon-green);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .feature p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        /* CTA section */
+        .cta {
+            text-align: center;
+            background: var(--darker-bg);
+            border-radius: 20px;
+            padding: 4rem;
+            border: 2px solid var(--neon-pink);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-neon);
+            opacity: 0.05;
+            z-index: -1;
+        }
+        
+        .cta h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--neon-pink);
+        }
+        
+        .cta p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+        }
+        
+        .cta-button {
+            background: var(--gradient-neon);
+            color: var(--dark-bg);
+            border: none;
+            padding: 1.5rem 4rem;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            border-radius: 40px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 212, 255, 0.5);
+        }
+        
+        /* Footer */
+        .footer {
+            background: var(--darker-bg);
+            border-top: 3px solid transparent;
+            border-image: var(--gradient-neon) 1;
+            padding: 3rem 0;
+            text-align: center;
+            margin-top: 6rem;
+        }
+        
+        .footer p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .footer a {
+            color: var(--neon-blue);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer a:hover {
+            color: var(--neon-green);
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .nav a {
+                display: block;
+                margin: 0.5rem 0;
+            }
+            
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 2rem 1rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="output" id="output"></div>
-        <div class="input-section">
-            <input type="text" id="commandInput" placeholder="Enter command">
-            <button onclick="processCommand()">Execute</button>
-        </div>
+    <div class="bg-grid"></div>
+    <div class="particles" id="particles"></div>
+    
+    <header class="header">
+        <div class="logo">MATTHIEU'S TEXT</div>
+        <div class="tagline">Retro Terminal Gaming Portal</div>
+    </header>
+    
+    <nav class="nav">
+        <a href="index.html" class="active">HOME</a>
+        <a href="arcade.html">ARCADE</a>
+        <a href="about.html">ABOUT</a>
+    </nav>
+    
+    <div class="container">
+        <section class="hero">
+            <h1>Welcome to the Neon Terminal</h1>
+            <p>Step into a cyberpunk future where text reigns supreme. Experience games that challenge your mind, not your graphics card. Pure code, pure gameplay, pure imagination.</p>
+        </section>
+        
+        <section class="games-grid">
+            <div class="game-card" onclick="location.href='arcade.html'">
+                <div class="game-icon">🎰</div>
+                <h2 class="game-title">Three Card Roulette</h2>
+                <p class="game-description">A neon-lit card betting experience with cyberpunk flair and retro mechanics.</p>
+                <ul class="game-features">
+                    <li>Color betting system with 2:1 payouts</li>
+                    <li>Exact suit prediction for 3:1 rewards</li>
+                    <li>Joker wildcards for bonus rounds</li>
+                    <li>Real-time statistical analysis</li>
+                    <li>Persistent neural network saves</li>
+                </ul>
+                <a href="arcade.html" class="play-button">Enter Casino</a>
+            </div>
+            
+            <div class="game-card" onclick="location.href='arcade.html'">
+                <div class="game-icon">🌐</div>
+                <h2 class="game-title">Cyber Adventure</h2>
+                <p class="game-description">Navigate through a digital landscape filled with mysteries and hidden terminals.</p>
+                <ul class="game-features">
+                    <li>8 interconnected virtual zones</li>
+                    <li>AI entities with dynamic dialogues</li>
+                    <li>Digital artifacts and power-ups</li>
+                    <li>Neural health monitoring system</li>
+                    <li>Procedural narrative generation</li>
+                </ul>
+                <a href="arcade.html" class="play-button">Jack In</a>
+            </div>
+        </section>
+        
+        <section class="features">
+            <h2>Neon Gaming Philosophy</h2>
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon">🧠</div>
+                    <h3>Neural Interface</h3>
+                    <p>Direct mind-to-code connection. No visual distractions, just pure mental stimulation.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Quantum Speed</h3>
+                    <p>Instantaneous loading through advanced compression algorithms. Zero latency gaming.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Precision Focus</h3>
+                    <p>Minimal interface, maximum engagement. Every command matters in the digital realm.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💾</div>
+                    <h3>Quantum Storage</h3>
+                    <p>Your progress stored in the blockchain of your browser. Never lose your achievements.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section class="cta">
+            <h1>Ready to Jack In?</h1>
+            <p>Enter the neon-lit arcade where code meets consciousness and games transcend reality.</p>
+            <a href="arcade.html" class="cta-button">Access Terminal</a>
+        </section>
     </div>
+    
+    <footer class="footer">
+        <p>&copy; 2024 Matthieu's Text Neural Network (Matthieustext.com) - All rights reserved</p>
+        <p>Designed by Matthieu | Powered by imagination and <a href="#">quantum algorithms</a></p>
+        <p>Retro-future gaming since the digital dawn</p>
+    </footer>
 
     <script>
-        let currentGame = 'roulette'; // 'roulette' or 'adventure'
-        
-        let rouletteState = {
-            balance: 100,
-            totalBets: 0,
-            totalWins: 0,
-            totalLosses: 0,
-            lastCard: null,
-            lastResult: null
-        };
-        
-        let adventureState = {
-            location: 'forest_entrance',
-            inventory: [],
-            health: 100,
-            score: 0,
-            visitedLocations: [],
-            gameFlags: {}
-        };
-
-        const output = document.getElementById('output');
-        const commandInput = document.getElementById('commandInput');
-        
-        // Adventure Game Locations and Story
-        const locations = {
-            forest_entrance: {
-                name: 'Forest Entrance',
-                description: 'You stand at the edge of a dark forest. A narrow path leads deeper into the woods. To your left is an old wooden sign.',
-                exits: { north: 'deep_forest', east: 'village' },
-                items: [],
-                firstVisit: 'The ancient trees tower above you, their branches creaking in the wind.'
-            },
-            deep_forest: {
-                name: 'Deep Forest',
-                description: 'You are surrounded by tall trees. Shadows dance between the trunks. You hear strange sounds in the distance.',
-                exits: { south: 'forest_entrance', west: 'cave_entrance', north: 'forest_clearing' },
-                items: ['stick'],
-                firstVisit: 'The deeper you go, the more mysterious this place becomes.'
-            },
-            cave_entrance: {
-                name: 'Cave Entrance',
-                description: 'A dark cave opens before you. Strange glowing crystals illuminate the entrance.',
-                exits: { east: 'deep_forest', inside: 'crystal_cave' },
-                items: [],
-                firstVisit: 'You feel a cool breeze coming from within the cave.'
-            },
-            crystal_cave: {
-                name: 'Crystal Cave',
-                description: 'The cave is filled with beautiful glowing crystals. Their light creates rainbow patterns on the walls.',
-                exits: { outside: 'cave_entrance' },
-                items: ['crystal'],
-                firstVisit: 'The crystals hum with magical energy.'
-            },
-            village: {
-                name: 'Village',
-                description: 'A small peaceful village with thatched roof houses. Villagers go about their daily business.',
-                exits: { west: 'forest_entrance', north: 'village_center' },
-                items: [],
-                firstVisit: 'The villagers nod at you in greeting.'
-            },
-            village_center: {
-                name: 'Village Center',
-                description: 'The heart of the village with a fountain and market stalls. An old wizard sits by the fountain.',
-                exits: { south: 'village', east: 'shop' },
-                items: [],
-                firstVisit: 'The wizard looks at you with knowing eyes.'
-            },
-            shop: {
-                name: 'Magic Shop',
-                description: 'A small shop filled with potions and magical items. The shopkeeper smiles at you.',
-                exits: { west: 'village_center' },
-                items: ['potion'],
-                firstVisit: 'The shop smells of herbs and magic.'
-            },
-            forest_clearing: {
-                name: 'Forest Clearing',
-                description: 'A peaceful clearing with a small pond. Sunlight filters through the canopy above.',
-                exits: { south: 'deep_forest' },
-                items: ['coin'],
-                firstVisit: 'This seems like a safe place to rest.'
-            }
-        };
-
-        function print(text) {
-            output.textContent += text + '\n';
-            output.scrollTop = output.scrollHeight;
-        }
-
-        function clearOutput() {
-            output.textContent = '';
-        }
-
-        function showHelp() {
-            if (currentGame === 'roulette') {
-                print('THREE CARD ROULETTE COMMANDS:');
-                print('help - Show this help');
-                print('balance - Show current balance');
-                print('stats - Show game statistics');
-                print('bet red [amount] - Bet on red cards');
-                print('bet black [amount] - Bet on black cards');
-                print('bet hearts [amount] - Bet on hearts');
-                print('bet diamonds [amount] - Bet on diamonds');
-                print('bet clubs [amount] - Bet on clubs');
-                print('bet spades [amount] - Bet on spades');
-                print('rules - Show game rules');
-                print('clear - Clear screen');
-                print('adventure - Switch to adventure game');
-                print('quit - Exit game');
-                print('');
-            } else {
-                print('TEXT ADVENTURE COMMANDS:');
-                print('help - Show this help');
-                print('look - Look around current location');
-                print('go [direction] - Move in a direction (north, south, east, west, inside, outside)');
-                print('take [item] - Pick up an item');
-                print('inventory - Show your items');
-                print('use [item] - Use an item from inventory');
-                print('talk - Talk to characters');
-                print('status - Show your health and score');
-                print('clear - Clear screen');
-                print('roulette - Switch to roulette game');
-                print('quit - Exit game');
-                print('');
-            }
-        }
-        
-        // Adventure Game Functions
-        function describeLocation() {
-            const loc = locations[adventureState.location];
-            print('=== ' + loc.name + ' ===');
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 20;
             
-            if (!adventureState.visitedLocations.includes(adventureState.location)) {
-                print(loc.firstVisit);
-                adventureState.visitedLocations.push(adventureState.location);
-                adventureState.score += 10;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (3 + Math.random() * 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Initialize effects
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            // Add hover effects to game cards
+            const gameCards = document.querySelectorAll('.game-card');
+            gameCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.borderColor = '#00ff88';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.borderColor = '#00d4ff';
+                });
+            });
+        });
+        
+        // Konami code easter egg
+        let konamiCode = [];
+        const konamiSequence = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+        
+        document.addEventListener('keydown', function(e) {
+            konamiCode.push(e.keyCode);
+            if (konamiCode.length > konamiSequence.length) {
+                konamiCode.shift();
             }
             
-            print(loc.description);
-            
-            if (loc.items.length > 0) {
-                print('You see: ' + loc.items.join(', '));
-            }
-            
-            const exits = Object.keys(loc.exits);
-            if (exits.length > 0) {
-                print('Exits: ' + exits.join(', '));
-            }
-            print('');
-        }
-        
-        function movePlayer(direction) {
-            const loc = locations[adventureState.location];
-            if (loc.exits[direction]) {
-                adventureState.location = loc.exits[direction];
-                describeLocation();
-            } else {
-                print('You cannot go that way.');
-            }
-        }
-        
-        function takeItem(item) {
-            const loc = locations[adventureState.location];
-            const itemIndex = loc.items.indexOf(item);
-            if (itemIndex !== -1) {
-                loc.items.splice(itemIndex, 1);
-                adventureState.inventory.push(item);
-                adventureState.score += 5;
-                print('You take the ' + item + '.');
-            } else {
-                print('There is no ' + item + ' here.');
-            }
-        }
-        
-        function showInventory() {
-            if (adventureState.inventory.length === 0) {
-                print('Your inventory is empty.');
-            } else {
-                print('You are carrying: ' + adventureState.inventory.join(', '));
-            }
-        }
-        
-        function useItem(item) {
-            if (!adventureState.inventory.includes(item)) {
-                print('You do not have a ' + item + '.');
-                return;
-            }
-            
-            switch(item) {
-                case 'potion':
-                    adventureState.health = Math.min(100, adventureState.health + 25);
-                    adventureState.inventory = adventureState.inventory.filter(i => i !== item);
-                    adventureState.score += 15;
-                    print('You drink the potion and feel refreshed. Health: ' + adventureState.health);
-                    break;
-                case 'crystal':
-                    if (adventureState.location === 'village_center') {
-                        print('The wizard examines the crystal and nods approvingly.');
-                        print('"This crystal holds great power," he says, "Take this reward."');
-                        adventureState.inventory.push('magic_ring');
-                        adventureState.inventory = adventureState.inventory.filter(i => i !== item);
-                        adventureState.score += 50;
-                    } else {
-                        print('The crystal glows softly but nothing happens here.');
-                    }
-                    break;
-                case 'stick':
-                    print('You wave the stick around. It might be useful as a weapon.');
-                    break;
-                case 'coin':
-                    if (adventureState.location === 'shop') {
-                        print('You give the coin to the shopkeeper who gives you a special potion.');
-                        adventureState.inventory.push('super_potion');
-                        adventureState.inventory = adventureState.inventory.filter(i => i !== item);
-                        adventureState.score += 25;
-                    } else {
-                        print('The coin glints in the light.');
-                    }
-                    break;
-                default:
-                    print('You cannot use the ' + item + ' right now.');
-            }
-        }
-        
-        function talkToCharacters() {
-            if (adventureState.location === 'village_center') {
-                print('The wizard speaks: "Greetings, traveler. Bring me a crystal from the caves and I shall reward you."');
-            } else if (adventureState.location === 'shop') {
-                print('The shopkeeper says: "Welcome! I trade rare coins for special potions."');
-            } else if (adventureState.location === 'village') {
-                print('A villager says: "Be careful in the forest! Strange things have been happening."');
-            } else {
-                print('There is no one here to talk to.');
-            }
-        }
-        
-        function showAdventureStatus() {
-            print('ADVENTURER STATUS:');
-            print('Health: ' + adventureState.health + '/100');
-            print('Score: ' + adventureState.score);
-            print('Location: ' + locations[adventureState.location].name);
-            print('Items: ' + (adventureState.inventory.length > 0 ? adventureState.inventory.join(', ') : 'none'));
-            print('');
-        }
-
-        function showBalance() {
-            print('Current Balance: $' + rouletteState.balance);
-            print('');
-        }
-
-        function showStats() {
-            print('ROULETTE STATISTICS:');
-            print('Total Bets: ' + rouletteState.totalBets);
-            print('Total Wins: ' + rouletteState.totalWins);
-            print('Total Losses: ' + rouletteState.totalLosses);
-            const winRate = rouletteState.totalBets > 0 ? ((rouletteState.totalWins / rouletteState.totalBets) * 100).toFixed(1) : 0;
-            print('Win Rate: ' + winRate + '%');
-            if (rouletteState.lastCard) {
-                print('Last Card: ' + rouletteState.lastCard);
-                print('Last Result: ' + rouletteState.lastResult);
-            }
-            print('');
-        }
-
-        function showRules() {
-            print('THREE CARD ROULETTE RULES:');
-            print('Deck: Hearts, Diamonds, Clubs, Spades, Joker');
-            print('Color Bets (2:1 payout): red, black');
-            print('Exact Bets (3:1 payout): hearts, diamonds, clubs, spades');
-            print('Joker: All bets refunded');
-            print('Minimum bet: $1');
-            print('');
-        }
-
-        function processBet(betType, amount) {
-            if (amount < 1) {
-                print('Minimum bet is $1');
-                return;
-            }
-            
-            if (amount > rouletteState.balance) {
-                print('Insufficient funds. Balance: $' + rouletteState.balance);
-                return;
-            }
-
-            rouletteState.balance -= amount;
-            rouletteState.totalBets++;
-
-            const cards = ['hearts', 'diamonds', 'clubs', 'spades', 'joker'];
-            const drawnCard = cards[Math.floor(Math.random() * cards.length)];
-            rouletteState.lastCard = drawnCard;
-
-            print('Bet: ' + betType + ' $' + amount);
-            print('Card drawn: ' + drawnCard);
-
-            if (drawnCard === 'joker') {
-                rouletteState.balance += amount;
-                rouletteState.lastResult = 'refund';
-                print('Joker! Bet refunded.');
-            } else {
-                let won = false;
-                let payout = 0;
-
-                if (betType === 'red' && (drawnCard === 'hearts' || drawnCard === 'diamonds')) {
-                    won = true;
-                    payout = amount * 2;
-                } else if (betType === 'black' && (drawnCard === 'clubs' || drawnCard === 'spades')) {
-                    won = true;
-                    payout = amount * 2;
-                } else if (betType === drawnCard) {
-                    won = true;
-                    payout = amount * 3;
-                }
-
-                if (won) {
-                    rouletteState.balance += payout;
-                    rouletteState.totalWins++;
-                    rouletteState.lastResult = 'win $' + payout;
-                    print('WIN! Payout: $' + payout);
-                } else {
-                    rouletteState.totalLosses++;
-                    rouletteState.lastResult = 'loss $' + amount;
-                    print('LOSS! Lost: $' + amount);
-                }
-            }
-
-            print('New balance: $' + rouletteState.balance);
-
-            if (rouletteState.balance <= 0) {
-                print('Game over! Restarting with $100');
-                rouletteState.balance = 100;
-            }
-            print('');
-        }
-
-        function switchToAdventure() {
-            currentGame = 'adventure';
-            print('Switching to Adventure Game...');
-            print('');
-            describeLocation();
-        }
-        
-        function switchToRoulette() {
-            currentGame = 'roulette';
-            print('Switching to Three Card Roulette...');
-            print('Current balance: $' + rouletteState.balance);
-            print('');
-        }
-
-        function processCommand() {
-            const command = commandInput.value.trim().toLowerCase();
-            if (!command) return;
-
-            print('> ' + command);
-            commandInput.value = '';
-
-            const parts = command.split(' ');
-            const cmd = parts[0];
-
-            // Universal commands
-            if (cmd === 'help') {
-                showHelp();
-                return;
-            }
-            if (cmd === 'clear') {
-                clearOutput();
-                return;
-            }
-            if (cmd === 'quit') {
-                print('Thanks for playing Matthieu\'s Text Arcade!');
-                commandInput.disabled = true;
-                return;
-            }
-            if (cmd === 'adventure') {
-                switchToAdventure();
-                return;
-            }
-            if (cmd === 'roulette') {
-                switchToRoulette();
-                return;
-            }
-
-            // Game-specific commands
-            if (currentGame === 'roulette') {
-                switch (cmd) {
-                    case 'balance':
-                        showBalance();
-                        break;
-                    case 'stats':
-                        showStats();
-                        break;
-                    case 'rules':
-                        showRules();
-                        break;
-                    case 'bet':
-                        if (parts.length < 3) {
-                            print('Usage: bet [type] [amount]');
-                            print('Example: bet red 25');
-                            break;
-                        }
-                        const betType = parts[1];
-                        const amount = parseInt(parts[2]);
-                        
-                        if (isNaN(amount)) {
-                            print('Invalid amount');
-                            break;
-                        }
-
-                        const validBets = ['red', 'black', 'hearts', 'diamonds', 'clubs', 'spades'];
-                        if (!validBets.includes(betType)) {
-                            print('Invalid bet type. Valid: red, black, hearts, diamonds, clubs, spades');
-                            break;
-                        }
-
-                        processBet(betType, amount);
-                        break;
-                    default:
-                        print('Unknown command. Type "help" for commands.');
-                        break;
-                }
-            } else if (currentGame === 'adventure') {
-                switch (cmd) {
-                    case 'look':
-                        describeLocation();
-                        break;
-                    case 'go':
-                        if (parts.length < 2) {
-                            print('Go where? (north, south, east, west, inside, outside)');
-                        } else {
-                            movePlayer(parts[1]);
-                        }
-                        break;
-                    case 'take':
-                        if (parts.length < 2) {
-                            print('Take what?');
-                        } else {
-                            takeItem(parts[1]);
-                        }
-                        break;
-                    case 'inventory':
-                        showInventory();
-                        break;
-                    case 'use':
-                        if (parts.length < 2) {
-                            print('Use what?');
-                        } else {
-                            useItem(parts[1]);
-                        }
-                        break;
-                    case 'talk':
-                        talkToCharacters();
-                        break;
-                    case 'status':
-                        showAdventureStatus();
-                        break;
-                    default:
-                        print('Unknown command. Type "help" for commands.');
-                        break;
-                }
-            }
-        }
-
-        commandInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                processCommand();
+            if (konamiCode.join(',') === konamiSequence.join(',')) {
+                document.body.style.filter = 'hue-rotate(180deg)';
+                setTimeout(() => {
+                    document.body.style.filter = 'none';
+                }, 3000);
             }
         });
-
-        // Initialize
-        print('MATTHIEU\'S TEXT ARCADE');
-        print('Available games: Three Card Roulette, Text Adventure');
-        print('Type "help" for commands, "adventure" or "roulette" to switch games');
-        print('');
-        print('THREE CARD ROULETTE (Current Game)');
-        print('Current balance: $' + rouletteState.balance);
-        print('');
-        commandInput.focus();
     </script>
 </body>
 </html>
