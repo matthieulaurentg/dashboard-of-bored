@@ -259,7 +259,6 @@ Current credits: $100
         setInterval(() => {
             if (currentGame === 'stonks') {
                 updateMarketPrices();
-                print('💰 Market prices updated automatically');
             }
         }, 15000);
         
@@ -617,19 +616,11 @@ Current credits: $100
         
         function updateMarketPrices() {
             const stocks = Object.keys(stonksState.prices);
-            let hasChanges = false;
             stocks.forEach(stock => {
                 const change = (Math.random() - 0.5) * 20; // -10 to +10
                 const newPrice = Math.max(10, stonksState.prices[stock] + change);
-                const roundedPrice = Math.round(newPrice * 100) / 100;
-                if (roundedPrice !== stonksState.prices[stock]) {
-                    hasChanges = true;
-                }
-                stonksState.prices[stock] = roundedPrice;
+                stonksState.prices[stock] = Math.round(newPrice * 100) / 100;
             });
-            if (hasChanges) {
-                print('Market prices updated!');
-            }
         }
         
         function showPrices() {
@@ -841,6 +832,7 @@ Current credits: $100
                         break;
                     case 'market':
                         updateMarketPrices();
+                        print('Market prices updated!');
                         showPrices();
                         break;
                     case 'stats':
