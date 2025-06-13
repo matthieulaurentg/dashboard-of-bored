@@ -75,7 +75,9 @@
     </div>
 
     <script>
-        let gameState = {
+        let currentGame = 'roulette'; // 'roulette' or 'adventure'
+        
+        let rouletteState = {
             balance: 100,
             totalBets: 0,
             totalWins: 0,
@@ -83,9 +85,78 @@
             lastCard: null,
             lastResult: null
         };
+        
+        let adventureState = {
+            location: 'forest_entrance',
+            inventory: [],
+            health: 100,
+            score: 0,
+            visitedLocations: [],
+            gameFlags: {}
+        };
 
         const output = document.getElementById('output');
         const commandInput = document.getElementById('commandInput');
+        
+        // Adventure Game Locations and Story
+        const locations = {
+            forest_entrance: {
+                name: 'Forest Entrance',
+                description: 'You stand at the edge of a dark forest. A narrow path leads deeper into the woods. To your left is an old wooden sign.',
+                exits: { north: 'deep_forest', east: 'village' },
+                items: [],
+                firstVisit: 'The ancient trees tower above you, their branches creaking in the wind.'
+            },
+            deep_forest: {
+                name: 'Deep Forest',
+                description: 'You are surrounded by tall trees. Shadows dance between the trunks. You hear strange sounds in the distance.',
+                exits: { south: 'forest_entrance', west: 'cave_entrance', north: 'forest_clearing' },
+                items: ['stick'],
+                firstVisit: 'The deeper you go, the more mysterious this place becomes.'
+            },
+            cave_entrance: {
+                name: 'Cave Entrance',
+                description: 'A dark cave opens before you. Strange glowing crystals illuminate the entrance.',
+                exits: { east: 'deep_forest', inside: 'crystal_cave' },
+                items: [],
+                firstVisit: 'You feel a cool breeze coming from within the cave.'
+            },
+            crystal_cave: {
+                name: 'Crystal Cave',
+                description: 'The cave is filled with beautiful glowing crystals. Their light creates rainbow patterns on the walls.',
+                exits: { outside: 'cave_entrance' },
+                items: ['crystal'],
+                firstVisit: 'The crystals hum with magical energy.'
+            },
+            village: {
+                name: 'Village',
+                description: 'A small peaceful village with thatched roof houses. Villagers go about their daily business.',
+                exits: { west: 'forest_entrance', north: 'village_center' },
+                items: [],
+                firstVisit: 'The villagers nod at you in greeting.'
+            },
+            village_center: {
+                name: 'Village Center',
+                description: 'The heart of the village with a fountain and market stalls. An old wizard sits by the fountain.',
+                exits: { south: 'village', east: 'shop' },
+                items: [],
+                firstVisit: 'The wizard looks at you with knowing eyes.'
+            },
+            shop: {
+                name: 'Magic Shop',
+                description: 'A small shop filled with potions and magical items. The shopkeeper smiles at you.',
+                exits: { west: 'village_center' },
+                items: ['potion'],
+                firstVisit: 'The shop smells of herbs and magic.'
+            },
+            forest_clearing: {
+                name: 'Forest Clearing',
+                description: 'A peaceful clearing with a small pond. Sunlight filters through the canopy above.',
+                exits: { south: 'deep_forest' },
+                items: ['coin'],
+                firstVisit: 'This seems like a safe place to rest.'
+            }
+        };
 
         function print(text) {
             output.textContent += text + '\n';
@@ -97,37 +168,172 @@
         }
 
         function showHelp() {
-            print('THREE CARD ROULETTE COMMANDS:');
-            print('help - Show this help');
-            print('balance - Show current balance');
-            print('stats - Show game statistics');
-            print('bet red [amount] - Bet on red cards');
-            print('bet black [amount] - Bet on black cards');
-            print('bet hearts [amount] - Bet on hearts');
-            print('bet diamonds [amount] - Bet on diamonds');
-            print('bet clubs [amount] - Bet on clubs');
-            print('bet spades [amount] - Bet on spades');
-            print('rules - Show game rules');
-            print('clear - Clear screen');
-            print('quit - Exit game');
+            if (currentGame === 'roulette') {
+                print('THREE CARD ROULETTE COMMANDS:');
+                print('help - Show this help');
+                print('balance - Show current balance');
+                print('stats - Show game statistics');
+                print('bet red [amount] - Bet on red cards');
+                print('bet black [amount] - Bet on black cards');
+                print('bet hearts [amount] - Bet on hearts');
+                print('bet diamonds [amount] - Bet on diamonds');
+                print('bet clubs [amount] - Bet on clubs');
+                print('bet spades [amount] - Bet on spades');
+                print('rules - Show game rules');
+                print('clear - Clear screen');
+                print('adventure - Switch to adventure game');
+                print('quit - Exit game');
+                print('');
+            } else {
+                print('TEXT ADVENTURE COMMANDS:');
+                print('help - Show this help');
+                print('look - Look around current location');
+                print('go [direction] - Move in a direction (north, south, east, west, inside, outside)');
+                print('take [item] - Pick up an item');
+                print('inventory - Show your items');
+                print('use [item] - Use an item from inventory');
+                print('talk - Talk to characters');
+                print('status - Show your health and score');
+                print('clear - Clear screen');
+                print('roulette - Switch to roulette game');
+                print('quit - Exit game');
+                print('');
+            }
+        }
+        
+        // Adventure Game Functions
+        function describeLocation() {
+            const loc = locations[adventureState.location];
+            print('=== ' + loc.name + ' ===');
+            
+            if (!adventureState.visitedLocations.includes(adventureState.location)) {
+                print(loc.firstVisit);
+                adventureState.visitedLocations.push(adventureState.location);
+                adventureState.score += 10;
+            }
+            
+            print(loc.description);
+            
+            if (loc.items.length > 0) {
+                print('You see: ' + loc.items.join(', '));
+            }
+            
+            const exits = Object.keys(loc.exits);
+            if (exits.length > 0) {
+                print('Exits: ' + exits.join(', '));
+            }
+            print('');
+        }
+        
+        function movePlayer(direction) {
+            const loc = locations[adventureState.location];
+            if (loc.exits[direction]) {
+                adventureState.location = loc.exits[direction];
+                describeLocation();
+            } else {
+                print('You cannot go that way.');
+            }
+        }
+        
+        function takeItem(item) {
+            const loc = locations[adventureState.location];
+            const itemIndex = loc.items.indexOf(item);
+            if (itemIndex !== -1) {
+                loc.items.splice(itemIndex, 1);
+                adventureState.inventory.push(item);
+                adventureState.score += 5;
+                print('You take the ' + item + '.');
+            } else {
+                print('There is no ' + item + ' here.');
+            }
+        }
+        
+        function showInventory() {
+            if (adventureState.inventory.length === 0) {
+                print('Your inventory is empty.');
+            } else {
+                print('You are carrying: ' + adventureState.inventory.join(', '));
+            }
+        }
+        
+        function useItem(item) {
+            if (!adventureState.inventory.includes(item)) {
+                print('You do not have a ' + item + '.');
+                return;
+            }
+            
+            switch(item) {
+                case 'potion':
+                    adventureState.health = Math.min(100, adventureState.health + 25);
+                    adventureState.inventory = adventureState.inventory.filter(i => i !== item);
+                    adventureState.score += 15;
+                    print('You drink the potion and feel refreshed. Health: ' + adventureState.health);
+                    break;
+                case 'crystal':
+                    if (adventureState.location === 'village_center') {
+                        print('The wizard examines the crystal and nods approvingly.');
+                        print('"This crystal holds great power," he says, "Take this reward."');
+                        adventureState.inventory.push('magic_ring');
+                        adventureState.inventory = adventureState.inventory.filter(i => i !== item);
+                        adventureState.score += 50;
+                    } else {
+                        print('The crystal glows softly but nothing happens here.');
+                    }
+                    break;
+                case 'stick':
+                    print('You wave the stick around. It might be useful as a weapon.');
+                    break;
+                case 'coin':
+                    if (adventureState.location === 'shop') {
+                        print('You give the coin to the shopkeeper who gives you a special potion.');
+                        adventureState.inventory.push('super_potion');
+                        adventureState.inventory = adventureState.inventory.filter(i => i !== item);
+                        adventureState.score += 25;
+                    } else {
+                        print('The coin glints in the light.');
+                    }
+                    break;
+                default:
+                    print('You cannot use the ' + item + ' right now.');
+            }
+        }
+        
+        function talkToCharacters() {
+            if (adventureState.location === 'village_center') {
+                print('The wizard speaks: "Greetings, traveler. Bring me a crystal from the caves and I shall reward you."');
+            } else if (adventureState.location === 'shop') {
+                print('The shopkeeper says: "Welcome! I trade rare coins for special potions."');
+            } else if (adventureState.location === 'village') {
+                print('A villager says: "Be careful in the forest! Strange things have been happening."');
+            } else {
+                print('There is no one here to talk to.');
+            }
+        }
+        
+        function showAdventureStatus() {
+            print('ADVENTURER STATUS:');
+            print('Health: ' + adventureState.health + '/100');
+            print('Score: ' + adventureState.score);
+            print('Location: ' + locations[adventureState.location].name);
+            print('Items: ' + (adventureState.inventory.length > 0 ? adventureState.inventory.join(', ') : 'none'));
             print('');
         }
 
         function showBalance() {
-            print('Current Balance: $' + gameState.balance);
+            print('Current Balance: $' + rouletteState.balance);
             print('');
         }
 
         function showStats() {
-            print('GAME STATISTICS:');
-            print('Total Bets: ' + gameState.totalBets);
-            print('Total Wins: ' + gameState.totalWins);
-            print('Total Losses: ' + gameState.totalLosses);
-            const winRate = gameState.totalBets > 0 ? ((gameState.totalWins / gameState.totalBets) * 100).toFixed(1) : 0;
+            print('ROULETTE STATISTICS:');
+            print('Total Bets: ' + rouletteState.totalBets);
+            print('Total Wins: ' + rouletteState.totalWins);
+            print('Total Losses: ' + rouletteState.totalLosses);
+            const winRate = rouletteState.totalBets > 0 ? ((rouletteState.totalWins / rouletteState.totalBets) * 100).toFixed(1) : 0;
             print('Win Rate: ' + winRate + '%');
-            if (gameState.lastCard) {
-                print('Last Card: ' + gameState.lastCard);
-                print('Last Result: ' + gameState.lastResult);
+            if (rouletteState.lastCard) {
+                print('Last Card: ' + rouletteState.lastCard);
+                print('Last Result: ' + rouletteState.lastResult);
             }
             print('');
         }
@@ -148,24 +354,24 @@
                 return;
             }
             
-            if (amount > gameState.balance) {
-                print('Insufficient funds. Balance: $' + gameState.balance);
+            if (amount > rouletteState.balance) {
+                print('Insufficient funds. Balance: $' + rouletteState.balance);
                 return;
             }
 
-            gameState.balance -= amount;
-            gameState.totalBets++;
+            rouletteState.balance -= amount;
+            rouletteState.totalBets++;
 
             const cards = ['hearts', 'diamonds', 'clubs', 'spades', 'joker'];
             const drawnCard = cards[Math.floor(Math.random() * cards.length)];
-            gameState.lastCard = drawnCard;
+            rouletteState.lastCard = drawnCard;
 
             print('Bet: ' + betType + ' $' + amount);
             print('Card drawn: ' + drawnCard);
 
             if (drawnCard === 'joker') {
-                gameState.balance += amount;
-                gameState.lastResult = 'refund';
+                rouletteState.balance += amount;
+                rouletteState.lastResult = 'refund';
                 print('Joker! Bet refunded.');
             } else {
                 let won = false;
@@ -183,23 +389,37 @@
                 }
 
                 if (won) {
-                    gameState.balance += payout;
-                    gameState.totalWins++;
-                    gameState.lastResult = 'win $' + payout;
+                    rouletteState.balance += payout;
+                    rouletteState.totalWins++;
+                    rouletteState.lastResult = 'win $' + payout;
                     print('WIN! Payout: $' + payout);
                 } else {
-                    gameState.totalLosses++;
-                    gameState.lastResult = 'loss $' + amount;
+                    rouletteState.totalLosses++;
+                    rouletteState.lastResult = 'loss $' + amount;
                     print('LOSS! Lost: $' + amount);
                 }
             }
 
-            print('New balance: $' + gameState.balance);
+            print('New balance: $' + rouletteState.balance);
 
-            if (gameState.balance <= 0) {
+            if (rouletteState.balance <= 0) {
                 print('Game over! Restarting with $100');
-                gameState.balance = 100;
+                rouletteState.balance = 100;
             }
+            print('');
+        }
+
+        function switchToAdventure() {
+            currentGame = 'adventure';
+            print('Switching to Adventure Game...');
+            print('');
+            describeLocation();
+        }
+        
+        function switchToRoulette() {
+            currentGame = 'roulette';
+            print('Switching to Three Card Roulette...');
+            print('Current balance: $' + rouletteState.balance);
             print('');
         }
 
@@ -213,51 +433,106 @@
             const parts = command.split(' ');
             const cmd = parts[0];
 
-            switch (cmd) {
-                case 'help':
-                    showHelp();
-                    break;
-                case 'balance':
-                    showBalance();
-                    break;
-                case 'stats':
-                    showStats();
-                    break;
-                case 'rules':
-                    showRules();
-                    break;
-                case 'clear':
-                    clearOutput();
-                    break;
-                case 'quit':
-                    print('Thanks for playing!');
-                    commandInput.disabled = true;
-                    break;
-                case 'bet':
-                    if (parts.length < 3) {
-                        print('Usage: bet [type] [amount]');
-                        print('Example: bet red 25');
-                        break;
-                    }
-                    const betType = parts[1];
-                    const amount = parseInt(parts[2]);
-                    
-                    if (isNaN(amount)) {
-                        print('Invalid amount');
-                        break;
-                    }
+            // Universal commands
+            if (cmd === 'help') {
+                showHelp();
+                return;
+            }
+            if (cmd === 'clear') {
+                clearOutput();
+                return;
+            }
+            if (cmd === 'quit') {
+                print('Thanks for playing Matthieu\'s Text Arcade!');
+                commandInput.disabled = true;
+                return;
+            }
+            if (cmd === 'adventure') {
+                switchToAdventure();
+                return;
+            }
+            if (cmd === 'roulette') {
+                switchToRoulette();
+                return;
+            }
 
-                    const validBets = ['red', 'black', 'hearts', 'diamonds', 'clubs', 'spades'];
-                    if (!validBets.includes(betType)) {
-                        print('Invalid bet type. Valid: red, black, hearts, diamonds, clubs, spades');
+            // Game-specific commands
+            if (currentGame === 'roulette') {
+                switch (cmd) {
+                    case 'balance':
+                        showBalance();
                         break;
-                    }
+                    case 'stats':
+                        showStats();
+                        break;
+                    case 'rules':
+                        showRules();
+                        break;
+                    case 'bet':
+                        if (parts.length < 3) {
+                            print('Usage: bet [type] [amount]');
+                            print('Example: bet red 25');
+                            break;
+                        }
+                        const betType = parts[1];
+                        const amount = parseInt(parts[2]);
+                        
+                        if (isNaN(amount)) {
+                            print('Invalid amount');
+                            break;
+                        }
 
-                    processBet(betType, amount);
-                    break;
-                default:
-                    print('Unknown command. Type "help" for commands.');
-                    break;
+                        const validBets = ['red', 'black', 'hearts', 'diamonds', 'clubs', 'spades'];
+                        if (!validBets.includes(betType)) {
+                            print('Invalid bet type. Valid: red, black, hearts, diamonds, clubs, spades');
+                            break;
+                        }
+
+                        processBet(betType, amount);
+                        break;
+                    default:
+                        print('Unknown command. Type "help" for commands.');
+                        break;
+                }
+            } else if (currentGame === 'adventure') {
+                switch (cmd) {
+                    case 'look':
+                        describeLocation();
+                        break;
+                    case 'go':
+                        if (parts.length < 2) {
+                            print('Go where? (north, south, east, west, inside, outside)');
+                        } else {
+                            movePlayer(parts[1]);
+                        }
+                        break;
+                    case 'take':
+                        if (parts.length < 2) {
+                            print('Take what?');
+                        } else {
+                            takeItem(parts[1]);
+                        }
+                        break;
+                    case 'inventory':
+                        showInventory();
+                        break;
+                    case 'use':
+                        if (parts.length < 2) {
+                            print('Use what?');
+                        } else {
+                            useItem(parts[1]);
+                        }
+                        break;
+                    case 'talk':
+                        talkToCharacters();
+                        break;
+                    case 'status':
+                        showAdventureStatus();
+                        break;
+                    default:
+                        print('Unknown command. Type "help" for commands.');
+                        break;
+                }
             }
         }
 
@@ -268,9 +543,12 @@
         });
 
         // Initialize
-        print('THREE CARD ROULETTE');
-        print('Type "help" for commands or "bet [type] [amount]" to play');
-        print('Current balance: $' + gameState.balance);
+        print('MATTHIEU\'S TEXT ARCADE');
+        print('Available games: Three Card Roulette, Text Adventure');
+        print('Type "help" for commands, "adventure" or "roulette" to switch games');
+        print('');
+        print('THREE CARD ROULETTE (Current Game)');
+        print('Current balance: $' + rouletteState.balance);
         print('');
         commandInput.focus();
     </script>
