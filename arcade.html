@@ -229,6 +229,164 @@ Current credits: $100
         let commandHistory = [];
         let historyIndex = -1;
         
+        // AI Command Assistant - Auto-correction and expansion
+        const commandSuggestions = {
+            // Common typos and misspellings
+            'qeusts': 'quests',
+            'qeust': 'quest', 
+            'balace': 'balance',
+            'balanse': 'balance',
+            'inventroy': 'inventory',
+            'invintory': 'inventory',
+            'stauts': 'status',
+            'statis': 'status',
+            'portfoloi': 'portfolio',
+            'portfollio': 'portfolio',
+            'roulett': 'roulette',
+            'roulete': 'roulette',
+            'stonk': 'stonks',
+            'stoks': 'stonks',
+            'aventure': 'adventure',
+            'advnture': 'adventure',
+            'hlep': 'help',
+            'halp': 'help',
+            'loook': 'look',
+            'lok': 'look',
+            'tak': 'take',
+            'tke': 'take',
+            'tlak': 'talk',
+            'takl': 'talk',
+            'prics': 'prices',
+            'price': 'prices',
+            'cleer': 'clear',
+            'cler': 'clear',
+            'restat': 'restart',
+            'resart': 'restart',
+            'mapp': 'map',
+            'mpa': 'map'
+        };
+        
+        const directionExpansions = {
+            'north': 'go north',
+            'n': 'go north',
+            'south': 'go south', 
+            's': 'go south',
+            'east': 'go east',
+            'e': 'go east',
+            'west': 'go west',
+            'w': 'go west',
+            'northeast': 'go northeast',
+            'ne': 'go northeast',
+            'northwest': 'go northwest', 
+            'nw': 'go northwest',
+            'southeast': 'go southeast',
+            'se': 'go southeast',
+            'southwest': 'go southwest',
+            'sw': 'go southwest',
+            'up': 'go up',
+            'u': 'go up',
+            'down': 'go down',
+            'd': 'go down'
+        };
+        
+        const actionExpansions = {
+            'i': 'inventory',
+            'inv': 'inventory',
+            'l': 'look',
+            'st': 'status',
+            'stat': 'status',
+            'q': 'quests',
+            'h': 'help',
+            'bal': 'balance',
+            'port': 'portfolio',
+            'm': 'map'
+        };
+        
+        function levenshteinDistance(a, b) {
+            const matrix = [];
+            for (let i = 0; i <= b.length; i++) {
+                matrix[i] = [i];
+            }
+            for (let j = 0; j <= a.length; j++) {
+                matrix[0][j] = j;
+            }
+            for (let i = 1; i <= b.length; i++) {
+                for (let j = 1; j <= a.length; j++) {
+                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+            return matrix[b.length][a.length];
+        }
+        
+        function findClosestCommand(input) {
+            const allCommands = [
+                'help', 'balance', 'stats', 'rules', 'adventure', 'roulette', 'stonks', 'clear', 'restart',
+                'look', 'go', 'take', 'inventory', 'use', 'talk', 'status', 'map', 'quests',
+                'portfolio', 'prices', 'market', 'buy', 'sell',
+                'bet', 'north', 'south', 'east', 'west', 'northeast', 'northwest', 'southeast', 'southwest'
+            ];
+            
+            let closest = null;
+            let minDistance = Infinity;
+            
+            for (const command of allCommands) {
+                const distance = levenshteinDistance(input.toLowerCase(), command.toLowerCase());
+                if (distance < minDistance && distance <= 2) { // Max 2 character differences
+                    minDistance = distance;
+                    closest = command;
+                }
+            }
+            
+            return closest;
+        }
+        
+        function processAICommand(input) {
+            const originalInput = input;
+            let corrected = false;
+            
+            // Check for direct typo corrections
+            if (commandSuggestions[input]) {
+                input = commandSuggestions[input];
+                corrected = true;
+            }
+            
+            // Check for direction expansions (only in adventure mode)
+            if (currentGame === 'adventure' && directionExpansions[input]) {
+                input = directionExpansions[input];
+                corrected = true;
+            }
+            
+            // Check for action expansions
+            if (actionExpansions[input]) {
+                input = actionExpansions[input];
+                corrected = true;
+            }
+            
+            // If no direct match, try fuzzy matching
+            if (!corrected) {
+                const closest = findClosestCommand(input);
+                if (closest && closest !== input) {
+                    input = closest;
+                    corrected = true;
+                }
+            }
+            
+            // Show correction message
+            if (corrected && originalInput !== input) {
+                print(`🤖 AI: Did you mean "${input}"? Executing...`);
+            }
+            
+            return input;
+        }
+        
         function quickCommand(cmd) {
             commandInput.value = cmd;
             processCommand();
@@ -421,6 +579,7 @@ Current credits: $100
                 print('stonks - Switch to stonks');
                 print('restart - Reset all games and start fresh');
                 print('clear - Clear screen');
+                print('🤖 AI Assistant: Autocorrects typos and expands shortcuts');
                 print('');
             } else if (currentGame === 'adventure') {
                 print('ADVENTURE COMMANDS:');
@@ -438,6 +597,7 @@ Current credits: $100
                 print('stonks - Switch to stonks');
                 print('restart - Reset all games and start fresh');
                 print('clear - Clear screen');
+                print('🤖 AI Shortcuts: n/s/e/w = go north/south/east/west, i = inventory, l = look');
                 print('');
             } else if (currentGame === 'stonks') {
                 print('STONKS COMMANDS:');
@@ -452,6 +612,7 @@ Current credits: $100
                 print('adventure - Switch to adventure');
                 print('restart - Reset all games and start fresh');
                 print('clear - Clear screen');
+                print('🤖 AI Shortcuts: bal = balance, port = portfolio, h = help');
                 print('');
             }
         }
@@ -922,7 +1083,7 @@ Current credits: $100
         }
 
         function processCommand() {
-            const command = commandInput.value.trim().toLowerCase();
+            let command = commandInput.value.trim().toLowerCase();
             if (!command) return;
 
             // Check for restart confirmation
@@ -939,16 +1100,23 @@ Current credits: $100
                 }
             }
 
+            // AI Command Processing
+            const originalCommand = command;
+            command = processAICommand(command);
+
             // Add to command history
-            if (commandHistory.length === 0 || commandHistory[commandHistory.length - 1] !== command) {
-                commandHistory.push(command);
+            if (commandHistory.length === 0 || commandHistory[commandHistory.length - 1] !== originalCommand) {
+                commandHistory.push(originalCommand);
                 if (commandHistory.length > 50) { // Keep last 50 commands
                     commandHistory.shift();
                 }
             }
             historyIndex = -1;
 
-            print('> ' + command);
+            print('> ' + originalCommand);
+            if (originalCommand !== command) {
+                // Don't print the corrected command again since AI already showed it
+            }
             commandInput.value = '';
 
             const parts = command.split(' ');
